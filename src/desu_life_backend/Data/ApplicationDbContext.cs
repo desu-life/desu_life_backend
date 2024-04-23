@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using desu_life_backend.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,10 @@ namespace desu_life_backend.Data;
 
 public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, IdentityRole<int>, int>
 {
+#nullable disable
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+#nullable enable
+
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
@@ -22,9 +27,4 @@ public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, Iden
     {
         base.OnModelCreating(builder);
     }
-}
-
-// TODO: 根据实际情况增加IdentityUser（用户模型类）的字段，符合业务需求
-public class DesuLifeIdentityUser : IdentityUser<int>
-{
 }

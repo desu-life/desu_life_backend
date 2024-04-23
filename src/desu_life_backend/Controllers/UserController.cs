@@ -23,7 +23,7 @@ public class UserController : ControllerBase
         {
             return BadRequest(new FailedResponse()
             {
-                Errors = result.Errors
+                Errors = result.Errors!
             });
         }
         return Ok(new TokenResponse
@@ -41,7 +41,7 @@ public class UserController : ControllerBase
         {
             return Unauthorized(new FailedResponse()
             {
-                Errors = result.Errors
+                Errors = result.Errors!
             });
         }
 
@@ -49,6 +49,27 @@ public class UserController : ControllerBase
         {
             AccessToken = result.AccessToken,
             TokenType = result.TokenType
+        });
+    }
+    
+    [HttpPost("RefreshToken")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
+    {
+        var result = await _userService.RefreshTokenAsync(request.AccessToken, request.RefreshToken);
+        if (!result.Success)
+        {
+            return Unauthorized(new FailedResponse()
+            {
+                Errors = result.Errors!
+            });
+        }
+    
+        return Ok(new TokenResponse
+        {
+            AccessToken = result.AccessToken,
+            TokenType = result.TokenType,
+            ExpiresIn = result.ExpiresIn,
+            RefreshToken = result.RefreshToken
         });
     }
 }

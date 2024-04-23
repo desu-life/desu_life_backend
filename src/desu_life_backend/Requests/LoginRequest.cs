@@ -1,4 +1,6 @@
-﻿namespace desu_life_backend.Requests;
+﻿#nullable disable
+
+namespace desu_life_backend.Requests;
 
 public class LoginRequest
 {
