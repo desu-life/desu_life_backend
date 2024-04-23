@@ -3,7 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace desu_life_backend.Data.Models;
+namespace desu.life.Data.Models;
 
 public class RefreshToken
 {

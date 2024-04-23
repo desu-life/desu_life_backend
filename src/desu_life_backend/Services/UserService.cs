@@ -3,13 +3,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using desu_life_backend.Data;
-using desu_life_backend.Data.Models;
+using desu.life.Data;
+using desu.life.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace desu_life_backend.Services;
+namespace desu.life.Services;
 
 //https://www.c-sharpcorner.com/article/securing-asp-net-core-web-api-with-jwt-authentication-and-role-based-authorizati/
 //https://www.cnblogs.com/xhznl/p/15406283.html

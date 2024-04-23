@@ -1,6 +1,6 @@
 ﻿#nullable disable
 
-namespace desu_life_backend.Requests
+namespace desu.life.Requests
 {
     public class RegisterRequest
     {

@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace desu_life_backend.Requests;
+namespace desu.life.Requests;
 
 /// <summary>
 /// RefreshToken 请求参数

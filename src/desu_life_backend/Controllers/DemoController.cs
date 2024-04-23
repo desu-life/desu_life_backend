@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace desu_life_backend.Controllers;
+namespace desu.life.Controllers;
 
 [ApiController]
 [Authorize] // 验证登录

@@ -1,4 +1,4 @@
-﻿namespace desu_life_backend
+﻿namespace desu.life.Responses
 {
     public class WeatherForecast
     {

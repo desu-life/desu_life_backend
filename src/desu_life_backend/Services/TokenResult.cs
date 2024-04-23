@@ -1,4 +1,4 @@
-﻿namespace desu_life_backend.Services;
+﻿namespace desu.life.Services;
 
 public class TokenResult
 {

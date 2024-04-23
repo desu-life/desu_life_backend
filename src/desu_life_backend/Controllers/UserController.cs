@@ -1,9 +1,9 @@
-﻿using desu_life_backend.Requests;
-using desu_life_backend.Responses;
-using desu_life_backend.Services;
+﻿using desu.life.Requests;
+using desu.life.Responses;
+using desu.life.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace desu_life_backend.Controllers;
+namespace desu.life.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

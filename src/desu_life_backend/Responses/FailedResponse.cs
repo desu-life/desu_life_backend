@@ -1,4 +1,4 @@
-﻿namespace desu_life_backend.Responses;
+﻿namespace desu.life.Responses;
 
 /// <summary>
 /// 登录、注册失败时返回错误信息

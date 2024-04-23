@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace desu_life_backend.Migrations
+namespace desu.life.Migrations
 {
     /// <inheritdoc />
     public partial class ApplicationDbContext_Initial : Migration

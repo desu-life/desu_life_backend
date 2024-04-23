@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Identity;
 
-namespace desu_life_backend.Data.Models;
+namespace desu.life.Data.Models;
 
 public class DesuLifeIdentityUser : IdentityUser<int>
 {

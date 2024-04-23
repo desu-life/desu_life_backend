@@ -1,12 +1,12 @@
 ﻿using System.Text;
-using desu_life_backend.Data;
-using desu_life_backend.Services;
+using desu.life.Data;
+using desu.life.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace desu_life_backend
+namespace desu.life
 {
     public class Program
     {

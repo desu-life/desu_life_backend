@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace desu_life_backend.Responses
+namespace desu.life.Responses
 {
     /// <summary>
     /// 注册、登录成功后返回 token
