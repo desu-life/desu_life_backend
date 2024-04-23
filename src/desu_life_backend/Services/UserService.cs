@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace desu_life_backend.Services;
 
+//https://www.c-sharpcorner.com/article/securing-asp-net-core-web-api-with-jwt-authentication-and-role-based-authorizati/
+//https://www.cnblogs.com/xhznl/p/15406283.html
 public class UserService : IUserService
 {
     private readonly ApplicationDbContext _applicationDbContext;
@@ -25,7 +27,7 @@ public class UserService : IUserService
         _userManager = userManager;
     }
 
-    public async Task<TokenResult> RegisterAsync(string username, string password, string email)
+    public async Task<TokenResult> RegisterAsync(string username, string password, string email) // Todo: 参数增加用户组
     {
         var existingUser = await _userManager.FindByNameAsync(username);
         if (existingUser != null)
@@ -46,7 +48,9 @@ public class UserService : IUserService
             };
         }
 
-        return await GenerateJwtTokenAsync(newUser);
+        // TODO: 赋予用户组，_userManager.AddToRoleAsync()
+        var roles = await _userManager.GetRolesAsync(newUser);
+        return await GenerateJwtTokenAsync(newUser, roles);
     }
 
     public async Task<TokenResult> LoginAsync(string username, string password)
@@ -69,7 +73,8 @@ public class UserService : IUserService
             };
         }
 
-        return await GenerateJwtTokenAsync(existingUser);
+        var roles = await _userManager.GetRolesAsync(existingUser);
+        return await GenerateJwtTokenAsync(existingUser, roles);
     }
 
     public async Task<TokenResult> RefreshTokenAsync(string token, string refreshToken)
@@ -153,7 +158,8 @@ public class UserService : IUserService
 
         Debug.Assert(dbUser != null);
 
-        return await GenerateJwtTokenAsync(dbUser);
+        var roles = await _userManager.GetRolesAsync(dbUser);
+        return await GenerateJwtTokenAsync(dbUser, roles);
     }
 
     private ClaimsPrincipal? GetClaimsPrincipalByToken(string token)
@@ -191,29 +197,50 @@ public class UserService : IUserService
         }
     }
 
-    private async Task<TokenResult> GenerateJwtTokenAsync(DesuLifeIdentityUser user)
+    private async Task<TokenResult> GenerateJwtTokenAsync(DesuLifeIdentityUser user, IEnumerable<string> roles)
     {
         Debug.Assert(_jwtSettings.SecurityKey != null);
+        Debug.Assert(user.UserName != null);
 
         var key = Encoding.ASCII.GetBytes(_jwtSettings.SecurityKey);
-
-        var tokenDescriptor = new SecurityTokenDescriptor
+        var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
+        var claims = new List<Claim>
         {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
-            }),
-            IssuedAt = DateTime.UtcNow,
-            NotBefore = DateTime.UtcNow,
-            Expires = DateTime.UtcNow.Add(_jwtSettings.ExpiresIn),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature)
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
         };
 
-        var jwtTokenHandler = new JwtSecurityTokenHandler();
-        var securityToken = jwtTokenHandler.CreateToken(tokenDescriptor);
-        var token = jwtTokenHandler.WriteToken(securityToken);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var securityToken = new JwtSecurityToken(
+            _jwtSettings.Issuer,
+            _jwtSettings.Audience,
+            claims,
+            expires: DateTime.UtcNow.Add(_jwtSettings.ExpiresIn),
+            signingCredentials: credentials,
+            notBefore: DateTime.UtcNow
+        );
+        var token = new JwtSecurityTokenHandler().WriteToken(securityToken);
+        //var tokenDescriptor = new SecurityTokenDescriptor
+        //{
+        //    Subject = new ClaimsIdentity(new[]
+        //    {
+        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
+        //        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
+        //    }),
+        //    IssuedAt = DateTime.UtcNow,
+        //    NotBefore = DateTime.UtcNow,
+        //    Expires = DateTime.UtcNow.Add(_jwtSettings.ExpiresIn),
+        //    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+        //        SecurityAlgorithms.HmacSha256Signature)
+        //};
+
+        //var jwtTokenHandler = new JwtSecurityTokenHandler();
+        //var securityToken = jwtTokenHandler.CreateToken(tokenDescriptor);
+        //var token = jwtTokenHandler.WriteToken(securityToken);
 
         var refreshToken = new RefreshToken
         {
