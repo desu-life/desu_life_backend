@@ -1,4 +1,4 @@
-namespace desu_life_backend;
+﻿namespace desu_life_backend;
 
 public class JwtSettings
 {

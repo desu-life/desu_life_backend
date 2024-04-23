@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
+ï»¿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace desu_life_backend.Controllers;
 
 [ApiController]
-[Authorize(Roles = "Admin")] // ÑéÖ¤¹ÜÀíÔ±Éí·İµÇÂ¼
+[Authorize(Roles = "Admin")] // éªŒè¯ç®¡ç†å‘˜èº«ä»½ç™»å½•
 [Route("[controller]")]
 public class Demo2Controller : ControllerBase
 {
