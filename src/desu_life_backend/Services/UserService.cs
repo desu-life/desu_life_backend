@@ -3,9 +3,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 using desu.life.Data;
 using desu.life.Data.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,13 +21,15 @@ public class UserService : IUserService
     private readonly ApplicationDbContext _applicationDbContext;
     private readonly JwtSettings _jwtSettings;
     private readonly UserManager<DesuLifeIdentityUser> _userManager;
+    private readonly IEmailSender _emailSender;
 
     public UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
-        UserManager<DesuLifeIdentityUser> userManager)
+        UserManager<DesuLifeIdentityUser> userManager, IEmailSender emailSender)
     {
         _applicationDbContext = applicationDbContext;
         _jwtSettings = jwtSettings;
         _userManager = userManager;
+        _emailSender = emailSender;
     }
 
     public async Task<TokenResult> RegisterAsync(string username, string password, string email) // Todo: 参数增加用户组
@@ -47,6 +52,17 @@ public class UserService : IUserService
                 Errors = isCreated.Errors.Select(p => p.Description)
             };
         }
+
+        //TODO: 邮箱验证
+        //var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+        //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        //var callbackUrl = "";
+        //await _emailSender.SendEmailAsync(email, "Confirm your email",
+        //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+        // return new TokenResult
+        // {
+        //     Errors = new[] { "email validation" }
+        // };
 
         // TODO: 赋予用户组，_userManager.AddToRoleAsync()
         var roles = await _userManager.GetRolesAsync(newUser);
@@ -72,6 +88,14 @@ public class UserService : IUserService
                 Errors = new[] { "wrong user name or password!" }, //用户名或密码错误
             };
         }
+        //TODO: 邮箱验证
+        //if (await _userManager.IsEmailConfirmedAsync(existingUser))
+        //{
+        //    return new TokenResult
+        //    {
+        //        Errors = new[] { "wrong user name or password!" }, //邮箱未验证
+        //    };
+        //}
 
         var roles = await _userManager.GetRolesAsync(existingUser);
         return await GenerateJwtTokenAsync(existingUser, roles);

@@ -7,4 +7,6 @@ public interface IUserService
     Task<TokenResult> LoginAsync(string username, string password);
 
     Task<TokenResult> RefreshTokenAsync(string token, string refreshToken);
+
+    //todo: 邮箱验证
 }

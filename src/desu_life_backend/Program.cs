@@ -2,8 +2,11 @@
 using desu.life.Data;
 using desu.life.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace desu.life;
@@ -30,10 +33,17 @@ public class Program
         );
 
         builder.Services
-            .AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddIdentityCore<IdentityUser>(config =>
+            {
+                config.SignIn.RequireConfirmedAccount = true;
+                config.Tokens.ProviderMap.Add("CustomEmailConfirmation",
+                    new TokenProviderDescriptor(typeof(EmailConfirmationTokenProvider<IdentityUser>)));
+                config.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
+            })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             //.AddRoles<IdentityRole>() //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
             ;
+        builder.Services.AddTransient<EmailConfirmationTokenProvider<IdentityUser>>();
         // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
 
 
@@ -63,8 +73,8 @@ public class Program
                     ClockSkew = TimeSpan.Zero,
                 };
             });
-
         // Add services to the container.
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddScoped<IUserService, UserService>();
 
         builder.Services.AddControllers();
@@ -90,5 +100,27 @@ public class Program
         app.MapControllers();
 
         app.Run();
+    }
+}
+
+public class EmailConfirmationTokenProviderOptions : DataProtectionTokenProviderOptions
+{
+    public EmailConfirmationTokenProviderOptions()
+    {
+        Name = "EmailDataProtectorTokenProvider";
+        TokenLifespan = TimeSpan.FromHours(3);
+    }
+}
+
+public class EmailConfirmationTokenProvider<TUser>
+    :  DataProtectorTokenProvider<TUser> where TUser : class
+{
+    public EmailConfirmationTokenProvider(
+        IDataProtectionProvider dataProtectionProvider,
+        IOptions<EmailConfirmationTokenProviderOptions> options,
+        ILogger<DataProtectorTokenProvider<TUser>> logger)
+        : base(dataProtectionProvider, options, logger)
+    {
+
     }
 }
