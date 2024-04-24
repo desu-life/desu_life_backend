@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using desu.life.Data;
+using desu.life.Data.Models;
 using desu.life.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
@@ -33,17 +34,17 @@ public class Program
         );
 
         builder.Services
-            .AddIdentityCore<IdentityUser>(config =>
+            .AddIdentityCore<DesuLifeIdentityUser>(config =>
             {
                 config.SignIn.RequireConfirmedAccount = true;
                 config.Tokens.ProviderMap.Add("CustomEmailConfirmation",
-                    new TokenProviderDescriptor(typeof(EmailConfirmationTokenProvider<IdentityUser>)));
+                    new TokenProviderDescriptor(typeof(EmailConfirmationTokenProvider<DesuLifeIdentityUser>)));
                 config.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             //.AddRoles<IdentityRole>() //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
             ;
-        builder.Services.AddTransient<EmailConfirmationTokenProvider<IdentityUser>>();
+        builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
         // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
 
 
