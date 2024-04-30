@@ -8,5 +8,5 @@ public interface IUserService
 
     Task<TokenResult> RefreshTokenAsync(string token, string refreshToken);
 
-    //todo: 邮箱验证
+    Task<TokenResult> EmailConfirmAsync(string email, string token);
 }

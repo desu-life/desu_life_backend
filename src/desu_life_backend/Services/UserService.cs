@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Configuration;
+using System.Data;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -7,11 +8,14 @@ using System.Text;
 using System.Text.Encodings.Web;
 using desu.life.Data;
 using desu.life.Data.Models;
+using desu.life.Responses;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace desu.life.Services;
 
@@ -33,19 +37,35 @@ public class UserService : IUserService
         _emailSender = emailSender;
     }
 
-    public async Task<TokenResult> RegisterAsync(string username, string password, string email) // Todo: 参数增加用户组
+    public async Task<TokenResult> RegisterAsync(string username, string password, string email)
     {
         var existingUser = await _userManager.FindByNameAsync(username);
-        if (existingUser != null)
+        
+        if (existingUser != null)  // 非已验证邮箱用户重新注册
         {
+
+            if (!existingUser.EmailConfirmed)
+            {
+                return new TokenResult
+                {
+                    Errors = new[] { "user already exists but email not confirmed!" },
+                };
+            }
             return new TokenResult
             {
-                Errors = new[] { "user already exists!" }, //用户已存在
+                Errors = new[] { "user already exists!" },
             };
         }
 
-        var newUser = new DesuLifeIdentityUser { UserName = username, Email = email };
+        var newUser = new DesuLifeIdentityUser
+        {
+            UserName = username,
+            Email = email,
+            RegisterTime = DateTimeOffset.Now.ToUnixTimeSeconds()
+        };
+        
         var isCreated = await _userManager.CreateAsync(newUser, password);
+        
         if (!isCreated.Succeeded)
         {
             return new TokenResult
@@ -54,40 +74,113 @@ public class UserService : IUserService
             };
         }
 
-        //TODO: 邮箱验证
-        //var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
-        //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        //var callbackUrl = "";
-        //await _emailSender.SendEmailAsync(email, "Confirm your email",
-        //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-        // return new TokenResult
-        // {
-        //     Errors = new[] { "email validation" }
-        // };
-
-        // TODO: 赋予用户组，_userManager.AddToRoleAsync()
-
+        // 注册阶段不赋予基本角色，等待邮箱验证
+        
         // 赋予基本角色
-        string[] BaseRoles = ["Login", "Customize"]; // 基本权限
-        foreach (var role in BaseRoles)
-        {
-            var addToRoleResult = await _userManager.AddToRoleAsync(newUser, role);
-            if (!addToRoleResult.Succeeded)
-                return new TokenResult { Errors = addToRoleResult.Errors.Select(p => p.Description) };
-
-        }
+        // string[] baseRoles = ["Login", "Customize"]; // 基本权限
+        // foreach (var role in baseRoles)
+        // {
+        //     var addToRoleResult = await _userManager.AddToRoleAsync(newUser, role);
+        //     if (!addToRoleResult.Succeeded)
+        //         return new TokenResult { Errors = addToRoleResult.Errors.Select(p => p.Description) };
+        //
+        // }
 
         // 赋予角色组
-        var addToRoleGroupResult = await _userManager.AddToRoleAsync(newUser, "UserGroup"); // User用户组
+        // var addToRoleGroupResult = await _userManager.AddToRoleAsync(newUser, "UserGroup"); // User用户组
+        // if (!addToRoleGroupResult.Succeeded)
+        //     return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
+        //
+        //
+        // var roles = await _userManager.GetRolesAsync(newUser);
+        
+        var emailSendResult = await SendEmailAsync(email);
+        if (!emailSendResult.Success)
+        {
+            return new TokenResult
+            {
+                Errors = new[] { "email send failed!" }
+            };
+        }
+        
+        return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));
+    }
+
+    public async Task<TokenResult> SendEmailAsync(string email)
+    {
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        
+        if (existingUser == null)
+        {
+            return new TokenResult
+            {
+                Errors = new[] { "user does not exist!" },
+            };
+        }
+
+        if (existingUser.EmailConfirmed)
+        {
+            return new TokenResult
+            {
+                Errors = new[] { "email already confirmed!" },
+            };
+        }
+        
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
+        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        var callbackUrl = $"{ConfigurationManager.AppSettings.GetValues("Host.Api")}/api/EmailConfirm" +
+                          $"?token={token}";
+        await _emailSender.SendEmailAsync(email, "Confirm your email",
+            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
+            );
+        
+        return new TokenResult {};
+    }
+
+    public async Task<TokenResult> EmailConfirmAsync(string email, string token)
+    {
+        var existingUser = await _userManager.FindByEmailAsync(email);
+        if (existingUser == null)
+        {
+            return new TokenResult
+            {
+                Errors = new[] { "user does not exist!" },
+            };
+        }
+        if (existingUser.EmailConfirmed)
+        {
+            return new TokenResult
+            {
+                Errors = new[] { "email already confirmed!" },
+            };
+        }
+
+        var confirmResult = await _userManager.ConfirmEmailAsync(existingUser, token);
+        if (!confirmResult.Succeeded)
+        {
+            return new TokenResult
+            {
+                Errors = confirmResult.Errors.Select(p => p.Description)
+            };
+        }
+        
+        // 赋予角色与角色组
+        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["Login", "Customize"]);
+        if (!addToRolesResult.Succeeded)
+        {
+            return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
+        }
+        
+        var addToRoleGroupResult = await _userManager.AddToRoleAsync(existingUser, "UserGroup");
         if (!addToRoleGroupResult.Succeeded)
             return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
-
-
-        var roles = await _userManager.GetRolesAsync(newUser);
-        return await GenerateJwtTokenAsync(newUser, roles);
+        
+        // TODO: 这里到底应不应该返回这个，然后让上一级来判断是否返回HTML，还是说这里直接返回HTML
+        return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }
 
     public async Task<TokenResult> LoginAsync(string username, string password)
+    // TODO: 改为email登录
     {
         var existingUser = await _userManager.FindByNameAsync(username);
         if (existingUser == null)
@@ -106,14 +199,15 @@ public class UserService : IUserService
                 Errors = new[] { "wrong user name or password!" }, //用户名或密码错误
             };
         }
-        //TODO: 邮箱验证
-        //if (await _userManager.IsEmailConfirmedAsync(existingUser))
-        //{
-        //    return new TokenResult
-        //    {
-        //        Errors = new[] { "wrong user name or password!" }, //邮箱未验证
-        //    };
-        //}
+        
+        if (!await _userManager.IsEmailConfirmedAsync(existingUser))
+        {
+            await SendEmailAsync(existingUser.Email!);
+            return new TokenResult
+            {
+                Errors = new[] { "wrong user name or password!" }, //邮箱未验证
+            };
+        }
 
         var roles = await _userManager.GetRolesAsync(existingUser);
         return await GenerateJwtTokenAsync(existingUser, roles);

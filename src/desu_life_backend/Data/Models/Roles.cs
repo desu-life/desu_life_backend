@@ -8,6 +8,7 @@ public class DesulifeIdentityRole : IdentityRole<int>
     public string Description { get; set; }
 }
 
+// TODO: [FrZ] 修改角色组
 public static class Roles
 {
     public static void ConfigureAuthorization(this IServiceCollection services)

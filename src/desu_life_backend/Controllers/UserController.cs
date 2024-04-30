@@ -33,6 +33,25 @@ public class UserController : ControllerBase
         });
     }
 
+    [HttpGet("EmailConfirm")]
+    public async Task<IActionResult> EmailConfirm(EmailVerifyRequest request)
+    {
+        var result = await _userService.EmailConfirmAsync(request.Email, request.Token);
+        if (!result.Success)
+        {
+            return BadRequest(new FailedResponse()
+            {
+                Errors = result.Errors!
+            });
+        }
+        // TODO: 目前返回ok，但是后续需要改为返回html供用户确认
+        return Ok(new TokenResponse
+        {
+            AccessToken = result.AccessToken,
+            TokenType = result.TokenType
+        });
+    }
+    
     [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
