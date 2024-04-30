@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desu_life_backend", "desu_life_backend\desu_life_backend.csproj", "{0CBDEC8A-7F5B-486E-A1F1-5A41962FAFF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0CBDEC8A-7F5B-486E-A1F1-5A41962FAFF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CBDEC8A-7F5B-486E-A1F1-5A41962FAFF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CBDEC8A-7F5B-486E-A1F1-5A41962FAFF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CBDEC8A-7F5B-486E-A1F1-5A41962FAFF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CA500865-E32E-4054-A62A-A9E11A055769}
+	EndGlobalSection
+EndGlobal

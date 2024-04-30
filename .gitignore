@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Custom
+src/desu_life_backend/appsettings.json
+src/desu_life_backend/appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo
