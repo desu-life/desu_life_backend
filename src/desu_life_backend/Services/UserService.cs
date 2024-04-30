@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Data;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -65,6 +66,23 @@ public class UserService : IUserService
         // };
 
         // TODO: 赋予用户组，_userManager.AddToRoleAsync()
+
+        // 赋予基本角色
+        string[] BaseRoles = ["Login", "Customize"]; // 基本权限
+        foreach (var role in BaseRoles)
+        {
+            var addToRoleResult = await _userManager.AddToRoleAsync(newUser, role);
+            if (!addToRoleResult.Succeeded)
+                return new TokenResult { Errors = addToRoleResult.Errors.Select(p => p.Description) };
+
+        }
+
+        // 赋予角色组
+        var addToRoleGroupResult = await _userManager.AddToRoleAsync(newUser, "UserGroup"); // User用户组
+        if (!addToRoleGroupResult.Succeeded)
+            return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
+
+
         var roles = await _userManager.GetRolesAsync(newUser);
         return await GenerateJwtTokenAsync(newUser, roles);
     }

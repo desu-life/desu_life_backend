@@ -18,7 +18,7 @@ public class UserController : ControllerBase
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var result = await _userService.RegisterAsync(request.UserName, request.Password, request.Address);
+        var result = await _userService.RegisterAsync(request.UserName, request.Password, request.Email);
         if (!result.Success)
         {
             return BadRequest(new FailedResponse()
@@ -36,7 +36,7 @@ public class UserController : ControllerBase
     [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var result = await _userService.LoginAsync(request.UserName, request.Password);
+        var result = await _userService.LoginAsync(request.Email, request.Password);
         if (!result.Success)
         {
             return Unauthorized(new FailedResponse()

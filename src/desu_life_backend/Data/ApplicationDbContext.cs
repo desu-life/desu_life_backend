@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace desu.life.Data;
 
-public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, IdentityRole<int>, int>
+public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, DesulifeIdentityRole, int>
 {
 #nullable disable
     public DbSet<RefreshToken> RefreshTokens { get; set; }

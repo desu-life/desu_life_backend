@@ -1,12 +1,16 @@
-﻿using System.Text;
+﻿using System;
+using System.Security.Claims;
+using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,6 +18,7 @@ namespace desu.life;
 
 public class Program
 {
+    public static string connectionString;
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -27,10 +32,10 @@ public class Program
 
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+        connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseMySql(ServerVersion.AutoDetect(connectionString))
+            options.UseMySql(connectionString, new MariaDbServerVersion(new Version(10, 11, 7)))
         );
 
         builder.Services
@@ -42,11 +47,17 @@ public class Program
                 config.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
-            //.AddRoles<IdentityRole>() //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
-            ;
+            .AddRoles<DesulifeIdentityRole>();
+        //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
-        // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
 
+        // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
+        builder.Services.AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
+        builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
+        builder.Services.ConfigureAuthorization();
+
+        // 创建角色组
+        // Roles.CreateRoles(builder.Services.BuildServiceProvider()).GetAwaiter().GetResult();
 
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
                           throw new InvalidOperationException($"Settings section '{nameof(JwtSettings)}' not found.");
@@ -114,7 +125,7 @@ public class EmailConfirmationTokenProviderOptions : DataProtectionTokenProvider
 }
 
 public class EmailConfirmationTokenProvider<TUser>
-    :  DataProtectorTokenProvider<TUser> where TUser : class
+    : DataProtectorTokenProvider<TUser> where TUser : class
 {
     public EmailConfirmationTokenProvider(
         IDataProtectionProvider dataProtectionProvider,

@@ -9,7 +9,7 @@ public class ApplicationDesignFactory : IDesignTimeDbContextFactory<ApplicationD
     {
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-        optionsBuilder.UseMySql(ServerVersion.AutoDetect(""));
+        optionsBuilder.UseMySql(Program.connectionString, new MariaDbServerVersion(new Version(10, 11, 7)));
 
         return new ApplicationDbContext(optionsBuilder.Options);
     }
