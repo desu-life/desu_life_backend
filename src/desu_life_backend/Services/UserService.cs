@@ -9,6 +9,7 @@ using System.Text.Encodings.Web;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Responses;
+using desu.life.Settings;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -45,10 +46,20 @@ public class UserService : IUserService
         {
 
             if (!existingUser.EmailConfirmed)
-            {
+            {                    
+                var existingUserEmailSendResult = await SendEmailAsync(email);
+                if (!existingUserEmailSendResult.Success)
+                {
+                    return new TokenResult
+                    {
+                        Errors = new[] { "user already exists but email not confirmed! and email send failed!" }
+                            
+                    };
+                }
+
                 return new TokenResult
                 {
-                    Errors = new[] { "user already exists but email not confirmed!" },
+                    Errors = new[] { "user already exists but email not confirmed! a new confirmation email has been sent to your email address." },
                 };
             }
             return new TokenResult
@@ -103,7 +114,7 @@ public class UserService : IUserService
             };
         }
         
-        return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));
+        return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));  // TODO: 该行报错 System.NotSupportedException: Store does not implement IUserRoleStore<TUser>.
     }
 
     public async Task<TokenResult> SendEmailAsync(string email)
@@ -127,7 +138,7 @@ public class UserService : IUserService
         }
         
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
-        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        // token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         var callbackUrl = $"{ConfigurationManager.AppSettings.GetValues("Host.Api")}/api/EmailConfirm" +
                           $"?token={token}";
         await _emailSender.SendEmailAsync(email, "Confirm your email",

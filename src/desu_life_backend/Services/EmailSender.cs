@@ -1,21 +1,37 @@
 ﻿#nullable disable
 
+using System.Collections.Immutable;
+using System.Net;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
+using MimeKit;
 using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace desu.life.Services;
 
-internal class EmailSender : IEmailSender
+public class EmailSender : IEmailSender
 {
-
-    private readonly string _smtpServer = ConfigurationManager.AppSettings["SmtpSettings.Host"];
-    private readonly int _smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpSettingsPort"]);
-    private readonly string _smtpUsername = ConfigurationManager.AppSettings["SmtpSettings.Username"];
-    private readonly string _smtpPassword = ConfigurationManager.AppSettings["SmtpSettings.Password"];
+    private readonly SmtpClient _smtpClient;
+    private readonly string _sender;
     
-    public Task SendEmailAsync(string email, string subject, string htmlMessage)
+    public EmailSender(string host, int port, string username, string password, bool enableSsl, string from)
     {
-        Console.WriteLine($"{_smtpServer}");
-        throw new NotImplementedException();
+        _sender = from;
+
+        _smtpClient = new SmtpClient();
+        _smtpClient.Connect(host, port, enableSsl);
+        _smtpClient.Authenticate(username, password);
+    }
+
+    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+    {
+        var mailMessage = new MimeMessage();
+        mailMessage.From.Add(new MailboxAddress(_sender, _sender));
+        mailMessage.To.Add(new MailboxAddress(email, email));
+        mailMessage.Subject = subject;
+        mailMessage.Body = new TextPart("html") { Text = htmlMessage };
+        
+        await _smtpClient.SendAsync(mailMessage);
     }
 }

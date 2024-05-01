@@ -34,9 +34,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("EmailConfirm")]
-    public async Task<IActionResult> EmailConfirm(EmailVerifyRequest request)
+    public async Task<IActionResult> EmailConfirm([FromQuery]string email, [FromQuery]string token)
     {
-        var result = await _userService.EmailConfirmAsync(request.Email, request.Token);
+        var result = await _userService.EmailConfirmAsync(email, token);
         if (!result.Success)
         {
             return BadRequest(new FailedResponse()

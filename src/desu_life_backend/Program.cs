@@ -4,6 +4,7 @@ using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;
+using desu.life.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -19,10 +20,11 @@ namespace desu.life;
 public class Program
 {
     public static string connectionString;
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
+
         ConfigureServices(builder);
 
         var app = builder.Build();
@@ -33,7 +35,7 @@ public class Program
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
         connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                               throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                           throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(connectionString, new MariaDbServerVersion(new Version(10, 11, 7)))
         );
@@ -52,13 +54,15 @@ public class Program
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
 
         // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
-        builder.Services.AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
+        builder.Services
+            .AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
         builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
         builder.Services.ConfigureAuthorization();
 
         // 创建角色组
         // Roles.CreateRoles(builder.Services.BuildServiceProvider()).GetAwaiter().GetResult();
 
+        // JWT
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
                           throw new InvalidOperationException($"Settings section '{nameof(JwtSettings)}' not found.");
         if (string.IsNullOrEmpty(jwtSettings.SecurityKey))
@@ -85,8 +89,28 @@ public class Program
                     ClockSkew = TimeSpan.Zero,
                 };
             });
+
+        // Services.EmailSender
+        var emailSettings = builder.Configuration.GetSection(nameof(SmtpSettings)).Get<SmtpSettings>() ??
+                            throw new InvalidOperationException(
+                                $"Settings section '{nameof(SmtpSettings)}' not found.");
+        if (string.IsNullOrEmpty(emailSettings.Host))
+        {
+            throw new InvalidOperationException($"Host of '{nameof(SmtpSettings)}' not set.");
+        }
+        
+        builder.Services.AddSingleton(emailSettings);
+        builder.Services.AddTransient<IEmailSender, EmailSender>(
+            provider =>
+            {
+                var smtpSettings = provider.GetRequiredService<SmtpSettings>();
+
+                return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
+                    smtpSettings.Password, smtpSettings.EnableSsl, smtpSettings.Sender);
+            });
+
         // Add services to the container.
-        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        // builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddScoped<IUserService, UserService>();
 
         builder.Services.AddControllers();
@@ -133,6 +157,5 @@ public class EmailConfirmationTokenProvider<TUser>
         ILogger<DataProtectorTokenProvider<TUser>> logger)
         : base(dataProtectionProvider, options, logger)
     {
-
     }
 }
