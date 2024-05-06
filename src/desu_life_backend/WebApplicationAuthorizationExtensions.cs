@@ -1,21 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using desu.life.Data.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace desu.life.Data.Models;
+namespace desu.life;
 
-#nullable disable //TODO: [milki] remigrate db
-public class DesulifeIdentityRole : IdentityRole<int>
+public static class WebApplicationAuthorizationExtensions
 {
-    [MaxLength(1024)]
-    public string Description { get; set; }
-}
-#nullable restore
+    // TODO: [FrZ] 修改角色组
 
-// TODO: [FrZ] 修改角色组
-public static class Roles
-{
-    public static void ConfigureAuthorization(this IServiceCollection services)
+    // Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.
+    // Policies: ManageUsers, ManageServers, ManageUserRoles, etc.
+    // options.AddPolicy("RequireManageUsersRole", policy => policy.RequireRole("ServerAdmin").RequireClaim("target_claim")); //基于claim验证对应功能
+    public static void AddDefaultAuthorization(this IServiceCollection services)
     {
         services.AddAuthorization(options =>
         {
@@ -27,9 +23,11 @@ public static class Roles
         });
     }
 
-    public static async Task CreateRoles(IServiceProvider serviceProvider)
+    public static async Task UseDefaultPoliciesAsync(this WebApplication app)
     {
-        var roleManager = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
+        var serviceProvider = app.Services;
+
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
         string[] roles =
             ["ManageUsers", "ManageServers", "ManageUserRoles",
             "Customize", "Login"];

@@ -53,7 +53,7 @@ public class Program
         builder.Services
             .AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
         builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
-        builder.Services.ConfigureAuthorization();
+        builder.Services.AddDefaultAuthorization();
 
         // JWT
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
@@ -122,7 +122,7 @@ public class Program
     private static async Task ConfigureAsync(WebApplication app)
     {
         // 创建角色组
-        await Roles.CreateRoles(app.Services);
+        await app.UseDefaultPoliciesAsync();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
