@@ -3,6 +3,7 @@
 using System.Collections.Immutable;
 using System.Net;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using MimeKit;
@@ -20,7 +21,7 @@ public class EmailSender : IEmailSender
         _sender = from;
 
         _smtpClient = new SmtpClient();
-        _smtpClient.Connect(host, port, enableSsl);
+        _smtpClient.Connect(host, port, enableSsl ? MailKit.Security.SecureSocketOptions.StartTls : MailKit.Security.SecureSocketOptions.Auto);
         _smtpClient.Authenticate(username, password);
     }
 
