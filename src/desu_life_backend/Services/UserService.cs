@@ -186,14 +186,13 @@ public class UserService : IUserService
         if (!addToRoleGroupResult.Succeeded)
             return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
         
-        // TODO: 这里到底应不应该返回这个，然后让上一级来判断是否返回HTML，还是说这里直接返回HTML
         return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }
 
-    public async Task<TokenResult> LoginAsync(string username, string password)
-    // TODO: 改为email登录
+    public async Task<TokenResult> LoginAsync(string email, string password)
     {
-        var existingUser = await _userManager.FindByNameAsync(username);
+        // var existingUser = await _userManager.FindByNameAsync(username);
+        var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser == null)
         {
             return new TokenResult
@@ -207,7 +206,7 @@ public class UserService : IUserService
         {
             return new TokenResult
             {
-                Errors = new[] { "wrong user name or password!" }, //用户名或密码错误
+                Errors = new[] { "wrong email or password!" }, //用户名或密码错误
             };
         }
         
@@ -216,7 +215,7 @@ public class UserService : IUserService
             await SendEmailAsync(existingUser.Email!);
             return new TokenResult
             {
-                Errors = new[] { "wrong user name or password!" }, //邮箱未验证
+                Errors = new[] { "wrong email or password!" }, //邮箱未验证
             };
         }
 
