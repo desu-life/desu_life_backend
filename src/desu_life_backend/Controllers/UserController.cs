@@ -44,7 +44,6 @@ public class UserController : ControllerBase
                 Errors = result.Errors!
             });
         }
-        // TODO: 目前返回ok，但是后续需要改为返回html供用户确认
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,

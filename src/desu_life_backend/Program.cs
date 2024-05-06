@@ -60,7 +60,7 @@ public class Program
         builder.Services.ConfigureAuthorization();
 
         // 创建角色组
-        // Roles.CreateRoles(builder.Services.BuildServiceProvider()).GetAwaiter().GetResult();
+        Roles.CreateRoles(builder.Services.BuildServiceProvider()).GetAwaiter().GetResult();
 
         // JWT
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??

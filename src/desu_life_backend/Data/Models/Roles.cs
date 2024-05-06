@@ -15,9 +15,11 @@ public static class Roles
     {
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("RequireAdministratorRole", policy => policy.RequireRole("Admin"));
-            options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
-            options.AddPolicy("RequireGuestRole", policy => policy.RequireRole("Guest"));
+            options.AddPolicy("RequireManageUsersRole", policy => policy.RequireRole("ManageUsers"));
+            options.AddPolicy("RequireManageServersRole", policy => policy.RequireRole("ManageServers"));
+            options.AddPolicy("RequireManageUserRolesRole", policy => policy.RequireRole("ManageUserRoles"));
+            options.AddPolicy("RequireCustomizeRole", policy => policy.RequireRole("Customize"));
+            options.AddPolicy("RequireLoginRole", policy => policy.RequireRole("Login"));
         });
     }
 
@@ -35,7 +37,10 @@ public static class Roles
         foreach (var role in roles)
         {
             var roleExist = await roleManager.RoleExistsAsync(role);
-            if (!roleExist) await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role });
+            if (!roleExist)
+            {
+                await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
+            }
         }
 
         // 更新描述
@@ -47,38 +52,33 @@ public static class Roles
         var groupRoleExist = await roleManager.RoleExistsAsync(groupName);
         if (!groupRoleExist)
         {
-            await roleManager.CreateAsync(new DesulifeIdentityRole { Name = groupName });
+            await roleManager.CreateAsync(new DesulifeIdentityRole { Name = groupName, Description = "" });
         }
 
         foreach (var role in roles)
         {
             var groupRole = await roleManager.FindByNameAsync(groupName);
+            if (groupRole == null) continue;
             await roleManager.AddClaimAsync(groupRole!, new Claim(ClaimTypes.Role, role));
         }
     }
 
     private static async Task UpdateRoleDescription(RoleManager<DesulifeIdentityRole> roleManager)
     {
-        foreach (var role in roleManager.Roles)
+        foreach (var role in roleManager.Roles.ToList())
         {
-            switch (role.Name)
+            var newRole = await roleManager.FindByIdAsync(role.Id.ToString());
+            if (newRole == null) continue;
+            role.Description = role.Name switch
             {
-                case "ManageUsers":
-                    role.Description = "该角色具有用户管理权限。";
-                    break;
-                case "ManageServers":
-                    role.Description = "该角色具有服务器管理权限。";
-                    break;
-                case "ManageUserRoles":
-                    role.Description = "该角色具有用户角色管理权限。";
-                    break;
-                case "Customize":
-                    role.Description = "该角色具有自定义权限。";
-                    break;
-                case "Login":
-                    role.Description = "该角色具有登录权限。";
-                    break;
-            }
+                "ManageUsers" => "该角色具有用户管理权限。",
+                "ManageServers" => "该角色具有服务器管理权限。",
+                "ManageUserRoles" => "该角色具有用户角色管理权限。",
+                "Customize" => "该角色具有自定义权限。",
+                "Login" => "该角色具有登录权限。",
+                _ => role.Description
+            };
+
             await roleManager.UpdateAsync(role);
         }
     }

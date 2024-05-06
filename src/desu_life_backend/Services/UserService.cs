@@ -114,7 +114,7 @@ public class UserService : IUserService
             };
         }
         
-        return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));  // TODO: 该行报错 System.NotSupportedException: Store does not implement IUserRoleStore<TUser>.
+        return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));
     }
 
     public async Task<TokenResult> SendEmailAsync(string email)
