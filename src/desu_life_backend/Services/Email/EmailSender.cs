@@ -1,21 +1,17 @@
 ﻿#nullable disable
 
-using System.Collections.Immutable;
-using System.Net;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.CodeAnalysis.Elfie.Serialization;
 using MimeKit;
-using ConfigurationManager = System.Configuration.ConfigurationManager;
 
-namespace desu.life.Services;
+namespace desu.life.Services.Email;
 
 public class EmailSender : IEmailSender
 {
     private readonly SmtpClient _smtpClient;
     private readonly string _sender;
-    
+
     public EmailSender(string host, int port, string username, string password, string secure, string from)
     {
         _sender = from;
@@ -40,7 +36,7 @@ public class EmailSender : IEmailSender
         mailMessage.To.Add(new MailboxAddress(email, email));
         mailMessage.Subject = subject;
         mailMessage.Body = new TextPart("html") { Text = htmlMessage };
-        
+
         await _smtpClient.SendAsync(mailMessage);
     }
 }

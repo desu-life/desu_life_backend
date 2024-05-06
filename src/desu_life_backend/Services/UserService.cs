@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,15 +7,12 @@ using System.Text;
 using System.Text.Encodings.Web;
 using desu.life.Data;
 using desu.life.Data.Models;
-using desu.life.Responses;
 using desu.life.Settings;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 namespace desu.life.Services;
 
@@ -27,14 +23,16 @@ public class UserService : IUserService
     private readonly ApplicationDbContext _applicationDbContext;
     private readonly JwtSettings _jwtSettings;
     private readonly UserManager<DesuLifeIdentityUser> _userManager;
+    private readonly IConfiguration _configuration;
     private readonly IEmailSender _emailSender;
 
     public UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
-        UserManager<DesuLifeIdentityUser> userManager, IEmailSender emailSender)
+        UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender)
     {
         _applicationDbContext = applicationDbContext;
         _jwtSettings = jwtSettings;
         _userManager = userManager;
+        _configuration = configuration;
         _emailSender = emailSender;
     }
 
@@ -138,9 +136,11 @@ public class UserService : IUserService
         }
         
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
-        // token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-        var callbackUrl = $"{ConfigurationManager.AppSettings.GetValues("Host.Api")}/api/EmailConfirm" +
-                          $"?token={token}";
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(email));
+
+        var callbackUrl = $"{_configuration.GetSection("Host")["Api"]}/api/User/EmailConfirm" +
+                          $"?email={encodedEmail}&token={encodedToken}";
         await _emailSender.SendEmailAsync(email, "Confirm your email",
             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
             );
@@ -150,7 +150,8 @@ public class UserService : IUserService
 
     public async Task<TokenResult> EmailConfirmAsync(string email, string token)
     {
-        var existingUser = await _userManager.FindByEmailAsync(email);
+        var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
+        var existingUser = await _userManager.FindByEmailAsync(decodedEmail);
         if (existingUser == null)
         {
             return new TokenResult
@@ -166,7 +167,8 @@ public class UserService : IUserService
             };
         }
 
-        var confirmResult = await _userManager.ConfirmEmailAsync(existingUser, token);
+        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+        var confirmResult = await _userManager.ConfirmEmailAsync(existingUser, decodedToken);
         if (!confirmResult.Succeeded)
         {
             return new TokenResult
