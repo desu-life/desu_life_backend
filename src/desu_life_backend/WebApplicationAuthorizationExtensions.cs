@@ -4,13 +4,30 @@ using Microsoft.AspNetCore.Identity;
 
 namespace desu.life;
 
+// TODO: [FrZ] 修改角色组
 public static class WebApplicationAuthorizationExtensions
 {
-    // TODO: [FrZ] 修改角色组
-
-    // Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.
-    // Policies: ManageUsers, ManageServers, ManageUserRoles, etc.
-    // options.AddPolicy("RequireManageUsersRole", policy => policy.RequireRole("ServerAdmin").RequireClaim("target_claim")); //基于claim验证对应功能
+    /// <summary>
+    /// 初始化默认的Authorization
+    /// </summary>
+    /// <remarks>
+    /// Role为用户组，Policy为具体的功能。<br/>
+    /// 一般来说，Policy是否合法首先验证Role，其次验证对应User的Policy开关。<br/>
+    /// 示例中使用Claim实现User具体Policy开关，或者也可使用其他方式。
+    /// </remarks>
+    /// <param name="services"></param>
+    /// <example>
+    ///     示例Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.<br/>
+    ///     示例Policies: ManageUsers, ManageServers, ManageUserRoles, etc.
+    ///     <code>
+    ///         options.AddPolicy("RequireManageUsersRole", policy => policy
+    ///             .RequireRole("ServerAdmin")
+    ///             .RequireAssertion(k => !k.User.HasClaim("RequireManageUsersRole")
+    ///                 // 基于Claim排除对应Policy，若Claim中存在对应Policy则该功能不可用
+    ///                 // 同时需要api进行管理Claim: _userManager.AddClaimsAsync()
+    ///         );
+    ///     </code>
+    /// </example>
     public static void AddDefaultAuthorization(this IServiceCollection services)
     {
         services.AddAuthorization(options =>
