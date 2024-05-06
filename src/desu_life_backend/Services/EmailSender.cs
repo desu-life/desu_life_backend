@@ -16,12 +16,20 @@ public class EmailSender : IEmailSender
     private readonly SmtpClient _smtpClient;
     private readonly string _sender;
     
-    public EmailSender(string host, int port, string username, string password, bool enableSsl, string from)
+    public EmailSender(string host, int port, string username, string password, string secure, string from)
     {
         _sender = from;
 
+        var secureSocketOptions = secure.ToLower() switch
+        {
+            "none" => SecureSocketOptions.None,
+            "ssl" => SecureSocketOptions.SslOnConnect,
+            "starttls" => SecureSocketOptions.StartTls,
+            _ => throw new ArgumentException($"Email service secure option {secure} is not supported now. (appsettings.json: Email.Secure)")
+        };
+
         _smtpClient = new SmtpClient();
-        _smtpClient.Connect(host, port, enableSsl ? MailKit.Security.SecureSocketOptions.StartTls : MailKit.Security.SecureSocketOptions.Auto);
+        _smtpClient.Connect(host, port, secureSocketOptions);
         _smtpClient.Authenticate(username, password);
     }
 

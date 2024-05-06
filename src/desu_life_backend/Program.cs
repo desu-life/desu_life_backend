@@ -98,16 +98,23 @@ public class Program
         {
             throw new InvalidOperationException($"Host of '{nameof(SmtpSettings)}' not set.");
         }
-        
-        builder.Services.AddSingleton(emailSettings);
-        builder.Services.AddTransient<IEmailSender, EmailSender>(
-            provider =>
-            {
-                var smtpSettings = provider.GetRequiredService<SmtpSettings>();
 
-                return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
-                    smtpSettings.Password, smtpSettings.EnableSsl, smtpSettings.Sender);
-            });
+        builder.Services.AddSingleton(emailSettings);
+        builder.Services.AddSingleton<IEmailSender, EmailSender>(provider =>
+        {
+            var smtpSettings = provider.GetRequiredService<SmtpSettings>();
+        
+            return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
+                smtpSettings.Password, smtpSettings.Secure, smtpSettings.Sender);
+        });
+        // builder.Services.AddTransient<IEmailSender, EmailSender>(
+        //     provider =>
+        //     {
+        //         var smtpSettings = provider.GetRequiredService<SmtpSettings>();
+        //
+        //         return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
+        //             smtpSettings.Password, smtpSettings.Secure, smtpSettings.Sender);
+        //     });
 
         // Add services to the container.
         // builder.Services.AddTransient<IEmailSender, EmailSender>();
