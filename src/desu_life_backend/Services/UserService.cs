@@ -39,19 +39,19 @@ public class UserService : IUserService
     public async Task<TokenResult> RegisterAsync(string username, string password, string email)
     {
         var existingUser = await _userManager.FindByNameAsync(username);
-        
+
         if (existingUser != null)  // 非已验证邮箱用户重新注册
         {
 
             if (!existingUser.EmailConfirmed)
-            {                    
+            {
                 var existingUserEmailSendResult = await SendEmailAsync(email);
                 if (!existingUserEmailSendResult.Success)
                 {
                     return new TokenResult
                     {
                         Errors = new[] { "user already exists but email not confirmed! and email send failed!" }
-                            
+
                     };
                 }
 
@@ -72,9 +72,9 @@ public class UserService : IUserService
             Email = email,
             RegisterTime = DateTimeOffset.Now.ToUnixTimeSeconds()
         };
-        
+
         var isCreated = await _userManager.CreateAsync(newUser, password);
-        
+
         if (!isCreated.Succeeded)
         {
             return new TokenResult
@@ -84,7 +84,7 @@ public class UserService : IUserService
         }
 
         // 注册阶段不赋予基本角色，等待邮箱验证
-        
+
         // 赋予基本角色
         // string[] baseRoles = ["Login", "Customize"]; // 基本权限
         // foreach (var role in baseRoles)
@@ -102,7 +102,7 @@ public class UserService : IUserService
         //
         //
         // var roles = await _userManager.GetRolesAsync(newUser);
-        
+
         var emailSendResult = await SendEmailAsync(email);
         if (!emailSendResult.Success)
         {
@@ -111,14 +111,14 @@ public class UserService : IUserService
                 Errors = new[] { "email send failed!" }
             };
         }
-        
+
         return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));
     }
 
     public async Task<TokenResult> SendEmailAsync(string email)
     {
         var existingUser = await _userManager.FindByEmailAsync(email);
-        
+
         if (existingUser == null)
         {
             return new TokenResult
@@ -134,7 +134,7 @@ public class UserService : IUserService
                 Errors = new[] { "email already confirmed!" },
             };
         }
-        
+
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(email));
@@ -144,8 +144,8 @@ public class UserService : IUserService
         await _emailSender.SendEmailAsync(email, "Confirm your email",
             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
             );
-        
-        return new TokenResult {};
+
+        return new TokenResult { };
     }
 
     public async Task<TokenResult> EmailConfirmAsync(string email, string token)
@@ -176,18 +176,18 @@ public class UserService : IUserService
                 Errors = confirmResult.Errors.Select(p => p.Description)
             };
         }
-        
+
         // 赋予角色与角色组
         var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["Login", "Customize"]);
         if (!addToRolesResult.Succeeded)
         {
             return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
         }
-        
+
         var addToRoleGroupResult = await _userManager.AddToRoleAsync(existingUser, "UserGroup");
         if (!addToRoleGroupResult.Succeeded)
             return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
-        
+
         return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }
 
@@ -211,7 +211,7 @@ public class UserService : IUserService
                 Errors = new[] { "wrong email or password!" }, //用户名或密码错误
             };
         }
-        
+
         if (!await _userManager.IsEmailConfirmedAsync(existingUser))
         {
             await SendEmailAsync(existingUser.Email!);
@@ -334,7 +334,7 @@ public class UserService : IUserService
                 jwtTokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
 
             var validatedSecurityAlgorithm = validatedToken is JwtSecurityToken jwtSecurityToken
-                                             && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                                             && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature,
                                                  StringComparison.InvariantCultureIgnoreCase);
 
             return validatedSecurityAlgorithm ? claimsPrincipal : null;
@@ -356,6 +356,8 @@ public class UserService : IUserService
         {
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
         };
 
         foreach (var role in roles)

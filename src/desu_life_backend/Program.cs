@@ -1,18 +1,14 @@
-﻿using System;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;
+using desu.life.Services.Email;
 using desu.life.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace desu.life;
@@ -21,7 +17,7 @@ public class Program
 {
     public static string connectionString;
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -58,9 +54,6 @@ public class Program
             .AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
         builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
         builder.Services.ConfigureAuthorization();
-
-        // 创建角色组
-        Roles.CreateRoles(builder.Services.BuildServiceProvider()).GetAwaiter().GetResult();
 
         // JWT
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
@@ -103,7 +96,7 @@ public class Program
         builder.Services.AddSingleton<IEmailSender, EmailSender>(provider =>
         {
             var smtpSettings = provider.GetRequiredService<SmtpSettings>();
-        
+
             return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
                 smtpSettings.Password, smtpSettings.Secure, smtpSettings.Sender);
         });
@@ -126,8 +119,11 @@ public class Program
         builder.Services.AddSwaggerGen();
     }
 
-    private static void Configure(WebApplication app)
+    private static async Task ConfigureAsync(WebApplication app)
     {
+        // 创建角色组
+        await Roles.CreateRoles(app.Services);
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -142,27 +138,6 @@ public class Program
 
         app.MapControllers();
 
-        app.Run();
-    }
-}
-
-public class EmailConfirmationTokenProviderOptions : DataProtectionTokenProviderOptions
-{
-    public EmailConfirmationTokenProviderOptions()
-    {
-        Name = "EmailDataProtectorTokenProvider";
-        TokenLifespan = TimeSpan.FromHours(3);
-    }
-}
-
-public class EmailConfirmationTokenProvider<TUser>
-    : DataProtectorTokenProvider<TUser> where TUser : class
-{
-    public EmailConfirmationTokenProvider(
-        IDataProtectionProvider dataProtectionProvider,
-        IOptions<EmailConfirmationTokenProviderOptions> options,
-        ILogger<DataProtectorTokenProvider<TUser>> logger)
-        : base(dataProtectionProvider, options, logger)
-    {
+        await app.RunAsync();
     }
 }

@@ -31,6 +31,7 @@ public class UserController : ControllerBase
             AccessToken = result.AccessToken,
             TokenType = result.TokenType,
             ExpiresIn = result.ExpiresIn,
+            RefreshToken = result.RefreshToken
         });
     }
 
@@ -68,6 +69,7 @@ public class UserController : ControllerBase
             AccessToken = result.AccessToken,
             TokenType = result.TokenType,
             ExpiresIn = result.ExpiresIn,
+            RefreshToken = result.RefreshToken
         });
     }
     
@@ -88,6 +90,7 @@ public class UserController : ControllerBase
             AccessToken = result.AccessToken,
             TokenType = result.TokenType,
             ExpiresIn = result.ExpiresIn,
+            RefreshToken = result.RefreshToken
         });
     }
     
