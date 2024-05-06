@@ -8,16 +8,16 @@ namespace desu.life;
 public static class WebApplicationAuthorizationExtensions
 {
     /// <summary>
-    /// 初始化默认的Authorization
+    ///     初始化默认的Authorization
     /// </summary>
     /// <remarks>
-    /// Role为用户组，Policy为具体的功能。<br/>
-    /// 一般来说，Policy是否合法首先验证Role，其次验证对应User的Policy开关。<br/>
-    /// 示例中使用Claim实现User具体Policy开关，或者也可使用其他方式。
+    ///     Role为用户组，Policy为具体的功能。<br />
+    ///     一般来说，Policy是否合法首先验证Role，其次验证对应User的Policy开关。<br />
+    ///     示例中使用Claim实现User具体Policy开关，或者也可使用其他方式。
     /// </remarks>
     /// <param name="services"></param>
     /// <example>
-    ///     示例Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.<br/>
+    ///     示例Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.<br />
     ///     示例Policies: ManageUsers, ManageServers, ManageUserRoles, etc.
     ///     <code>
     ///         options.AddPolicy("RequireManageUsersRole", policy => policy
@@ -46,8 +46,10 @@ public static class WebApplicationAuthorizationExtensions
 
         var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
         string[] roles =
-            ["ManageUsers", "ManageServers", "ManageUserRoles",
-            "Customize", "Login"];
+        [
+            "ManageUsers", "ManageServers", "ManageUserRoles",
+            "Customize", "Login"
+        ];
 
         // 角色组
         await CreateGroupRole(roleManager, "AdminGroup", ["ManageUsers", "ManageServers", "ManageUserRoles"]);
@@ -56,17 +58,15 @@ public static class WebApplicationAuthorizationExtensions
         foreach (var role in roles)
         {
             var roleExist = await roleManager.RoleExistsAsync(role);
-            if (!roleExist)
-            {
-                await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
-            }
+            if (!roleExist) await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
         }
 
         // 更新描述
         await UpdateRoleDescription(roleManager);
     }
 
-    private static async Task CreateGroupRole(RoleManager<DesulifeIdentityRole> roleManager, string groupName, string[] roles)
+    private static async Task CreateGroupRole(RoleManager<DesulifeIdentityRole> roleManager, string groupName,
+        string[] roles)
     {
         var groupRole = await roleManager.FindByNameAsync(groupName);
         if (groupRole == null)
@@ -105,5 +105,4 @@ public static class WebApplicationAuthorizationExtensions
             await roleManager.UpdateAsync(role);
         }
     }
-
 }

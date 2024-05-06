@@ -1,12 +1,8 @@
-﻿#nullable disable
-
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace desu.life.Data.Models;
 
 public class DesuLifeIdentityUser : IdentityUser<int>
 {
-    
     public long RegisterTime { get; set; }
-
 }

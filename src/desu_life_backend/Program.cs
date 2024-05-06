@@ -59,9 +59,7 @@ public class Program
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
                           throw new InvalidOperationException($"Settings section '{nameof(JwtSettings)}' not found.");
         if (string.IsNullOrEmpty(jwtSettings.SecurityKey))
-        {
             throw new InvalidOperationException($"SecurityKey of '{nameof(JwtSettings)}' not set.");
-        }
 
         builder.Services.AddSingleton(jwtSettings);
         builder.Services
@@ -79,7 +77,7 @@ public class Program
                     ValidateAudience = false,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.SecurityKey)),
-                    ClockSkew = TimeSpan.Zero,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
@@ -88,9 +86,7 @@ public class Program
                             throw new InvalidOperationException(
                                 $"Settings section '{nameof(SmtpSettings)}' not found.");
         if (string.IsNullOrEmpty(emailSettings.Host))
-        {
             throw new InvalidOperationException($"Host of '{nameof(SmtpSettings)}' not set.");
-        }
 
         builder.Services.AddSingleton(emailSettings);
         builder.Services.AddSingleton<IEmailSender, EmailSender>(provider =>

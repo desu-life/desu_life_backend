@@ -10,6 +10,7 @@ namespace desu.life.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+
     public UserController(IUserService userService)
     {
         _userService = userService;
@@ -20,12 +21,10 @@ public class UserController : ControllerBase
     {
         var result = await _userService.RegisterAsync(request.UserName, request.Password, request.Email);
         if (!result.Success)
-        {
-            return BadRequest(new FailedResponse()
+            return BadRequest(new FailedResponse
             {
                 Errors = result.Errors!
             });
-        }
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,
@@ -58,12 +57,10 @@ public class UserController : ControllerBase
     {
         var result = await _userService.EmailConfirmAsync(request.Email, request.Token);
         if (!result.Success)
-        {
-            return BadRequest(new FailedResponse()
+            return BadRequest(new FailedResponse
             {
                 Errors = result.Errors!
             });
-        }
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,
@@ -72,18 +69,16 @@ public class UserController : ControllerBase
             RefreshToken = result.RefreshToken
         });
     }
-    
+
     [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await _userService.LoginAsync(request.Email, request.Password);
         if (!result.Success)
-        {
-            return Unauthorized(new FailedResponse()
+            return Unauthorized(new FailedResponse
             {
                 Errors = result.Errors!
             });
-        }
 
         return Ok(new TokenResponse
         {
@@ -93,19 +88,17 @@ public class UserController : ControllerBase
             RefreshToken = result.RefreshToken
         });
     }
-    
+
     [HttpPost("RefreshToken")]
     public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
     {
         var result = await _userService.RefreshTokenAsync(request.AccessToken, request.RefreshToken);
         if (!result.Success)
-        {
-            return Unauthorized(new FailedResponse()
+            return Unauthorized(new FailedResponse
             {
                 Errors = result.Errors!
             });
-        }
-    
+
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,

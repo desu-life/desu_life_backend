@@ -9,8 +9,8 @@ namespace desu.life.Services.Email;
 
 public class EmailSender : IEmailSender
 {
-    private readonly SmtpClient _smtpClient;
     private readonly string _sender;
+    private readonly SmtpClient _smtpClient;
 
     public EmailSender(string host, int port, string username, string password, string secure, string from)
     {
@@ -21,7 +21,8 @@ public class EmailSender : IEmailSender
             "none" => SecureSocketOptions.None,
             "ssl" => SecureSocketOptions.SslOnConnect,
             "starttls" => SecureSocketOptions.StartTls,
-            _ => throw new ArgumentException($"Email service secure option {secure} is not supported now. (appsettings.json: Email.Secure)")
+            _ => throw new ArgumentException(
+                $"Email service secure option {secure} is not supported now. (appsettings.json: Email.Secure)")
         };
 
         _smtpClient = new SmtpClient();

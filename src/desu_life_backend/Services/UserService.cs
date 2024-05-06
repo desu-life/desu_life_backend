@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -21,10 +20,10 @@ namespace desu.life.Services;
 public class UserService : IUserService
 {
     private readonly ApplicationDbContext _applicationDbContext;
-    private readonly JwtSettings _jwtSettings;
-    private readonly UserManager<DesuLifeIdentityUser> _userManager;
     private readonly IConfiguration _configuration;
     private readonly IEmailSender _emailSender;
+    private readonly JwtSettings _jwtSettings;
+    private readonly UserManager<DesuLifeIdentityUser> _userManager;
 
     public UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
         UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender)
@@ -40,29 +39,29 @@ public class UserService : IUserService
     {
         var existingUser = await _userManager.FindByNameAsync(username);
 
-        if (existingUser != null)  // 非已验证邮箱用户重新注册
+        if (existingUser != null) // 非已验证邮箱用户重新注册
         {
-
             if (!existingUser.EmailConfirmed)
             {
                 var existingUserEmailSendResult = await SendEmailAsync(email);
                 if (!existingUserEmailSendResult.Success)
-                {
                     return new TokenResult
                     {
                         Errors = new[] { "user already exists but email not confirmed! and email send failed!" }
-
                     };
-                }
 
                 return new TokenResult
                 {
-                    Errors = new[] { "user already exists but email not confirmed! a new confirmation email has been sent to your email address." },
+                    Errors = new[]
+                    {
+                        "user already exists but email not confirmed! a new confirmation email has been sent to your email address."
+                    }
                 };
             }
+
             return new TokenResult
             {
-                Errors = new[] { "user already exists!" },
+                Errors = new[] { "user already exists!" }
             };
         }
 
@@ -76,12 +75,10 @@ public class UserService : IUserService
         var isCreated = await _userManager.CreateAsync(newUser, password);
 
         if (!isCreated.Succeeded)
-        {
             return new TokenResult
             {
                 Errors = isCreated.Errors.Select(p => p.Description)
             };
-        }
 
         // 注册阶段不赋予基本角色，等待邮箱验证
 
@@ -105,47 +102,12 @@ public class UserService : IUserService
 
         var emailSendResult = await SendEmailAsync(email);
         if (!emailSendResult.Success)
-        {
             return new TokenResult
             {
                 Errors = new[] { "email send failed!" }
             };
-        }
 
         return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));
-    }
-
-    public async Task<TokenResult> SendEmailAsync(string email)
-    {
-        var existingUser = await _userManager.FindByEmailAsync(email);
-
-        if (existingUser == null)
-        {
-            return new TokenResult
-            {
-                Errors = new[] { "user does not exist!" },
-            };
-        }
-
-        if (existingUser.EmailConfirmed)
-        {
-            return new TokenResult
-            {
-                Errors = new[] { "email already confirmed!" },
-            };
-        }
-
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
-        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-        var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(email));
-
-        var callbackUrl = $"{_configuration.GetSection("Host")["Api"]}/api/User/EmailConfirm" +
-                          $"?email={encodedEmail}&token={encodedToken}";
-        await _emailSender.SendEmailAsync(email, "Confirm your email",
-            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
-            );
-
-        return new TokenResult { };
     }
 
     public async Task<TokenResult> EmailConfirmAsync(string email, string token)
@@ -153,36 +115,28 @@ public class UserService : IUserService
         var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
         var existingUser = await _userManager.FindByEmailAsync(decodedEmail);
         if (existingUser == null)
-        {
             return new TokenResult
             {
-                Errors = new[] { "user does not exist!" },
+                Errors = new[] { "user does not exist!" }
             };
-        }
         if (existingUser.EmailConfirmed)
-        {
             return new TokenResult
             {
-                Errors = new[] { "email already confirmed!" },
+                Errors = new[] { "email already confirmed!" }
             };
-        }
 
         var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
         var confirmResult = await _userManager.ConfirmEmailAsync(existingUser, decodedToken);
         if (!confirmResult.Succeeded)
-        {
             return new TokenResult
             {
                 Errors = confirmResult.Errors.Select(p => p.Description)
             };
-        }
 
         // 赋予角色与角色组
         var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["Login", "Customize"]);
         if (!addToRolesResult.Succeeded)
-        {
             return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
-        }
 
         var addToRoleGroupResult = await _userManager.AddToRoleAsync(existingUser, "UserGroup");
         if (!addToRoleGroupResult.Succeeded)
@@ -196,28 +150,24 @@ public class UserService : IUserService
         // var existingUser = await _userManager.FindByNameAsync(username);
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser == null)
-        {
             return new TokenResult
             {
-                Errors = new[] { "user does not exist!" }, //用户不存在
+                Errors = new[] { "user does not exist!" } //用户不存在
             };
-        }
 
         var isCorrect = await _userManager.CheckPasswordAsync(existingUser, password);
         if (!isCorrect)
-        {
             return new TokenResult
             {
-                Errors = new[] { "wrong email or password!" }, //用户名或密码错误
+                Errors = new[] { "wrong email or password!" } //用户名或密码错误
             };
-        }
 
         if (!await _userManager.IsEmailConfirmedAsync(existingUser))
         {
             await SendEmailAsync(existingUser.Email!);
             return new TokenResult
             {
-                Errors = new[] { "wrong email or password!" }, //邮箱未验证
+                Errors = new[] { "wrong email or password!" } //邮箱未验证
             };
         }
 
@@ -229,74 +179,60 @@ public class UserService : IUserService
     {
         var claimsPrincipal = GetClaimsPrincipalByToken(token);
         if (claimsPrincipal == null)
-        {
             // 无效的token...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "1: Invalid request!" },
+                Errors = new[] { "1: Invalid request!" }
             };
-        }
 
         var expiryDateUnix =
             long.Parse(claimsPrincipal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
         var expiryDateTimeUtc = UnixTimeStampToDateTime(expiryDateUnix);
         if (expiryDateTimeUtc > DateTime.UtcNow)
-        {
             // token未过期...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "2: Invalid request!" },
+                Errors = new[] { "2: Invalid request!" }
             };
-        }
 
         var jti = claimsPrincipal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
         var storedRefreshToken =
             await _applicationDbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken);
         if (storedRefreshToken == null)
-        {
             // 无效的refresh_token...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "3: Invalid request!" },
+                Errors = new[] { "3: Invalid request!" }
             };
-        }
 
         if (storedRefreshToken.ExpiryTime < DateTime.UtcNow)
-        {
             // refresh_token已过期...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "4: Invalid request!" },
+                Errors = new[] { "4: Invalid request!" }
             };
-        }
 
         if (storedRefreshToken.Invalidated)
-        {
             // refresh_token已失效...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "5: Invalid request!" },
+                Errors = new[] { "5: Invalid request!" }
             };
-        }
 
         if (storedRefreshToken.Used)
-        {
             // refresh_token已使用...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "6: Invalid request!" },
+                Errors = new[] { "6: Invalid request!" }
             };
-        }
 
         if (storedRefreshToken.JwtId != jti)
-        {
             // refresh_token与此token不匹配...
-            return new TokenResult()
+            return new TokenResult
             {
-                Errors = new[] { "7: Invalid request!" },
+                Errors = new[] { "7: Invalid request!" }
             };
-        }
 
         storedRefreshToken.Used = true;
         //_userDbContext.RefreshTokens.Update(storedRefreshToken);
@@ -308,6 +244,35 @@ public class UserService : IUserService
 
         var roles = await _userManager.GetRolesAsync(dbUser);
         return await GenerateJwtTokenAsync(dbUser, roles);
+    }
+
+    public async Task<TokenResult> SendEmailAsync(string email)
+    {
+        var existingUser = await _userManager.FindByEmailAsync(email);
+
+        if (existingUser == null)
+            return new TokenResult
+            {
+                Errors = new[] { "user does not exist!" }
+            };
+
+        if (existingUser.EmailConfirmed)
+            return new TokenResult
+            {
+                Errors = new[] { "email already confirmed!" }
+            };
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(email));
+
+        var callbackUrl = $"{_configuration.GetSection("Host")["Api"]}/api/User/EmailConfirm" +
+                          $"?email={encodedEmail}&token={encodedToken}";
+        await _emailSender.SendEmailAsync(email, "Confirm your email",
+            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
+        );
+
+        return new TokenResult();
     }
 
     private ClaimsPrincipal? GetClaimsPrincipalByToken(string token)
@@ -324,8 +289,8 @@ public class UserService : IUserService
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.SecurityKey)),
                 ClockSkew = TimeSpan.Zero,
                 ValidateLifetime = false // 解析token，注意这里的tokenValidationParameters，
-                                         // 这个参数和Startup中设置的tokenValidationParameters唯一的区别是ValidateLifetime = false，
-                                         // 不验证过期时间
+                // 这个参数和Startup中设置的tokenValidationParameters唯一的区别是ValidateLifetime = false，
+                // 不验证过期时间
             };
 
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -334,7 +299,8 @@ public class UserService : IUserService
                 jwtTokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
 
             var validatedSecurityAlgorithm = validatedToken is JwtSecurityToken jwtSecurityToken
-                                             && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature,
+                                             && jwtSecurityToken.Header.Alg.Equals(
+                                                 SecurityAlgorithms.HmacSha256Signature,
                                                  StringComparison.InvariantCultureIgnoreCase);
 
             return validatedSecurityAlgorithm ? claimsPrincipal : null;
@@ -354,16 +320,13 @@ public class UserService : IUserService
         var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString())
+            new(ClaimTypes.Name, user.UserName),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString())
         };
 
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
+        foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
 
         var securityToken = new JwtSecurityToken(
             _jwtSettings.Issuer,
@@ -409,7 +372,7 @@ public class UserService : IUserService
             AccessToken = token,
             TokenType = "Bearer",
             RefreshToken = refreshToken.Token,
-            ExpiresIn = (int)_jwtSettings.ExpiresIn.TotalSeconds,
+            ExpiresIn = (int)_jwtSettings.ExpiresIn.TotalSeconds
         };
     }
 
