@@ -51,8 +51,8 @@ public class UserController : ControllerBase
     //     });
     // }
 
-    [HttpPost("EmailConfirm")]
-    public async Task<IActionResult> EmailConfirm(EmailConfirmRequest request)
+    [HttpGet("EmailConfirm")]
+    public async Task<IActionResult> EmailConfirm([FromQuery]EmailConfirmRequest request)
     {
         var result = await _userService.EmailConfirmAsync(request.Email, request.Token);
         if (!result.Success)
