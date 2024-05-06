@@ -33,10 +33,28 @@ public class UserController : ControllerBase
         });
     }
 
-    [HttpGet("EmailConfirm")]
-    public async Task<IActionResult> EmailConfirm([FromQuery]string email, [FromQuery]string token)
+    // [HttpGet("EmailConfirm")]
+    // public async Task<IActionResult> EmailConfirm([FromQuery]string email, [FromQuery]string token)
+    // {
+    //     var result = await _userService.EmailConfirmAsync(email, token);
+    //     if (!result.Success)
+    //     {
+    //         return BadRequest(new FailedResponse()
+    //         {
+    //             Errors = result.Errors!
+    //         });
+    //     }
+    //     return Ok(new TokenResponse
+    //     {
+    //         AccessToken = result.AccessToken,
+    //         TokenType = result.TokenType
+    //     });
+    // }
+
+    [HttpPost("EmailConfirm")]
+    public async Task<IActionResult> EmailConfirm(EmailConfirmRequest request)
     {
-        var result = await _userService.EmailConfirmAsync(email, token);
+        var result = await _userService.EmailConfirmAsync(request.Email, request.Token);
         if (!result.Success)
         {
             return BadRequest(new FailedResponse()
