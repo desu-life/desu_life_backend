@@ -29,7 +29,8 @@ public class UserController : ControllerBase
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,
-            TokenType = result.TokenType
+            TokenType = result.TokenType,
+            ExpiresIn = result.ExpiresIn,
         });
     }
 
@@ -65,7 +66,8 @@ public class UserController : ControllerBase
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,
-            TokenType = result.TokenType
+            TokenType = result.TokenType,
+            ExpiresIn = result.ExpiresIn,
         });
     }
     
@@ -84,7 +86,8 @@ public class UserController : ControllerBase
         return Ok(new TokenResponse
         {
             AccessToken = result.AccessToken,
-            TokenType = result.TokenType
+            TokenType = result.TokenType,
+            ExpiresIn = result.ExpiresIn,
         });
     }
     

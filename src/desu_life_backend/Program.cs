@@ -29,7 +29,7 @@ public class Program
 
         var app = builder.Build();
 
-        Configure(app);
+        await ConfigureAsync(app);
     }
 
     private static void ConfigureServices(WebApplicationBuilder builder)
@@ -48,8 +48,8 @@ public class Program
                     new TokenProviderDescriptor(typeof(EmailConfirmationTokenProvider<DesuLifeIdentityUser>)));
                 config.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddRoles<DesulifeIdentityRole>();
+            .AddRoles<DesulifeIdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
         //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
 

@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace desu.life.Data.Models;
 
+#nullable disable //TODO: [milki] remigrate db
 public class DesulifeIdentityRole : IdentityRole<int>
 {
+    [MaxLength(1024)]
     public string Description { get; set; }
 }
+#nullable restore
 
 // TODO: [FrZ] 修改角色组
 public static class Roles
@@ -49,17 +53,21 @@ public static class Roles
 
     private static async Task CreateGroupRole(RoleManager<DesulifeIdentityRole> roleManager, string groupName, string[] roles)
     {
-        var groupRoleExist = await roleManager.RoleExistsAsync(groupName);
-        if (!groupRoleExist)
+        var groupRole = await roleManager.FindByNameAsync(groupName);
+        if (groupRole == null)
         {
-            await roleManager.CreateAsync(new DesulifeIdentityRole { Name = groupName, Description = "" });
+            groupRole = new DesulifeIdentityRole { Name = groupName };
+            await roleManager.CreateAsync(groupRole);
         }
 
+        if (roles.Length == 0) return;
+
+        var claims = (await roleManager.GetClaimsAsync(groupRole)).Select(k => k.ToString()).ToHashSet();
         foreach (var role in roles)
         {
-            var groupRole = await roleManager.FindByNameAsync(groupName);
-            if (groupRole == null) continue;
-            await roleManager.AddClaimAsync(groupRole!, new Claim(ClaimTypes.Role, role));
+            var claim = new Claim(ClaimTypes.Role, role);
+            if (claims.Contains(claim.ToString())) continue;
+            await roleManager.AddClaimAsync(groupRole, claim);
         }
     }
 
