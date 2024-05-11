@@ -389,4 +389,74 @@ public class UserService : IUserService
         // Unix timestamp is seconds past epoch
         return DateTime.UnixEpoch.AddSeconds(unixTimeStamp).ToLocalTime();
     }
+
+    // TODO
+    public async Task AddUserClaimAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user, string claimType, string claimValue)
+    {
+        var claim = new Claim(claimType, claimValue);
+        var result = await userManager.AddClaimAsync(user, claim);
+        if (!result.Succeeded)
+        {
+            // 处理错误
+        }
+    }
+
+    // TODO
+    public async Task RemoveClaimAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user, string claimType, string claimValue)
+    {
+        // 先获取用户现有的所有声明
+        var claims = await userManager.GetClaimsAsync(user);
+        // 找到具体的声明
+        var claimToRemove = claims.FirstOrDefault(c => c.Type == claimType && c.Value == claimValue);
+        if (claimToRemove != null)
+        {
+            // 存在则删除这个声明
+            var result = await userManager.RemoveClaimAsync(user, claimToRemove);
+            if (!result.Succeeded)
+            {
+                // 如果删除失败，处理错误
+                throw new InvalidOperationException("Failed to remove claim.");
+            }
+        }
+        else
+        {
+            // 如果没有找到声明，处理错误
+            throw new InvalidOperationException("Claim not found.");
+        }
+    }
+
+    // TODO
+    public async Task<bool> UpdateClaimAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user, string claimType, string oldClaimValue, string newClaimValue)
+    {
+        var claims = await userManager.GetClaimsAsync(user);
+        var oldClaim = claims.FirstOrDefault(c => c.Type == claimType && c.Value == oldClaimValue);
+
+        if (oldClaim != null)
+        {
+            // 删除旧声明
+            var removeResult = await userManager.RemoveClaimAsync(user, oldClaim);
+            if (!removeResult.Succeeded)
+            {
+                return false; // 如果删除失败，返回false
+            }
+
+            // 添加新声明
+            var newClaim = new Claim(claimType, newClaimValue);
+            var addResult = await userManager.AddClaimAsync(user, newClaim);
+            if (!addResult.Succeeded)
+            {
+                return false; // 如果添加失败，返回false
+            }
+
+            return true; // 全部成功
+        }
+
+        return false; // 如果没有找到旧声明，返回false
+    }
+
+    // TODO
+    public async Task<List<Claim>> GetUserClaimsAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user)
+    {
+        return [.. (await userManager.GetClaimsAsync(user))];
+    }
 }

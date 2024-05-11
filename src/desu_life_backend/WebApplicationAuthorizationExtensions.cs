@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using desu.life.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace desu.life;
 
@@ -30,75 +32,133 @@ public static class WebApplicationAuthorizationExtensions
     /// </example>
     public static void AddDefaultAuthorization(this IServiceCollection services)
     {
+        // 添加授权服务
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("RequireManageUsersRole", policy => policy.RequireRole("ManageUsers"));
-            options.AddPolicy("RequireManageServersRole", policy => policy.RequireRole("ManageServers"));
-            options.AddPolicy("RequireManageUserRolesRole", policy => policy.RequireRole("ManageUserRoles"));
-            options.AddPolicy("RequireCustomizeRole", policy => policy.RequireRole("Customize"));
-            options.AddPolicy("RequireLoginRole", policy => policy.RequireRole("Login"));
+            // example
+            // 验证用户是否具有特定角色且所需的Policy没有被禁用
+            //  options.AddPolicy("RequireManageUsersRole", policy => policy
+            //    .RequireRole("ServerAdmin")
+            //    .RequireAssertion(context =>
+            //          !context.User.HasClaim(c => c.Type == "DisablePolicy" && c.Value == "RequireManageUsersRole")));
+
+            // 允许带有特定声明的用户管理服务器
+            // options.AddPolicy("ManageServers", policy => policy
+            //    .RequireAssertion(context =>
+            //        context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "ManageServers")));
+
+
+            // 应用的示例
+            // [Authorize(Policy = "CanManageEvents")]
+            // public IActionResult ManageEvent()
+            // {
+            //     return View();
+            // }
+            //
+            // [Authorize(Policy = "ReadAccess")]
+            // public IActionResult PublicPage()
+            // {
+            //     return View();
+            // }
+
+            // Claim管理 UserService.cs -> AddUserClaimAsync/RemoveClaimAsync/GetUserClaimsAsync/UpdateUserClaimAsync
+
+            // 基础 Basic
+            options.AddPolicy("Login", policy => policy
+                .RequireRole("Basic"));
+
+            options.AddPolicy("ViewProfile", policy => policy
+                .RequireRole("Basic"));
+
+            options.AddPolicy("RefreshToken", policy => policy
+               .RequireRole("Basic"));
+
+            // 用户 User
+            options.AddPolicy("EditProfile", policy => policy
+                .RequireRole("User")
+                .RequireAssertion(context => !context.User.HasClaim(c => c.Type == "DisablePolicy" && c.Value == "EditProfile")));
+
+            options.AddPolicy("LinkAccount", policy => policy
+                .RequireRole("User"));
+
+            options.AddPolicy("ChangePassword", policy => policy
+                .RequireRole("User"));
+
+            options.AddPolicy("Customize", policy => policy
+                .RequireRole("User")
+                .RequireAssertion(context => !context.User.HasClaim(c => c.Type == "DisablePolicy" && c.Value == "Customize")));
+
+            // 管理员 Administrator
+            options.AddPolicy("ManageUsers", policy => policy
+                .RequireRole("Administrator"));
+
+            options.AddPolicy("ManageRoles", policy => policy
+                .RequireRole("Administrator"));
+
+            options.AddPolicy("Maintenance", policy => policy
+                .RequireRole("Administrator"));
+
+            options.AddPolicy("ManageServerSettings", policy => policy
+                .RequireRole("Administrator"));
+
+            options.AddPolicy("ManageAPITokens", policy => policy
+                .RequireRole("Administrator"));
+
         });
     }
 
     public static async Task UseDefaultPoliciesAsync(this WebApplication app)
     {
+        // 获取服务提供者
         var serviceProvider = app.Services;
 
+        // 获取角色管理器
         var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
+
+        // 定义角色组
         string[] roles =
         [
-            "ManageUsers", "ManageServers", "ManageUserRoles",
-            "Customize", "Login"
+            "System", "Bot", "Administrator", "Moderator", "CoOrganizer",
+            "PremiumUser", "User", "Basic"
         ];
 
-        // 角色组
-        await CreateGroupRole(roleManager, "AdminGroup", ["ManageUsers", "ManageServers", "ManageUserRoles"]);
-        await CreateGroupRole(roleManager, "UserGroup", []);
-
+        // 创建角色
         foreach (var role in roles)
         {
             var roleExist = await roleManager.RoleExistsAsync(role);
-            if (!roleExist) await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
+            // 如果角色不存在则创建
+            if (!roleExist)
+            {
+                await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
+            }
         }
 
         // 更新描述
         await UpdateRoleDescription(roleManager);
     }
 
-    private static async Task CreateGroupRole(RoleManager<DesulifeIdentityRole> roleManager, string groupName,
-        string[] roles)
-    {
-        var groupRole = await roleManager.FindByNameAsync(groupName);
-        if (groupRole == null)
-        {
-            groupRole = new DesulifeIdentityRole { Name = groupName };
-            await roleManager.CreateAsync(groupRole);
-        }
-
-        if (roles.Length == 0) return;
-
-        var claims = (await roleManager.GetClaimsAsync(groupRole)).Select(k => k.ToString()).ToHashSet();
-        foreach (var role in roles)
-        {
-            var claim = new Claim(ClaimTypes.Role, role);
-            if (claims.Contains(claim.ToString())) continue;
-            await roleManager.AddClaimAsync(groupRole, claim);
-        }
-    }
-
     private static async Task UpdateRoleDescription(RoleManager<DesulifeIdentityRole> roleManager)
     {
+        // 更新角色描述
         foreach (var role in roleManager.Roles.ToList())
         {
+            // 获取角色
             var newRole = await roleManager.FindByIdAsync(role.Id.ToString());
+
+            // 如果角色不存在则跳过
             if (newRole == null) continue;
+
+            // 更新角色描述
             role.Description = role.Name switch
             {
-                "ManageUsers" => "该角色具有用户管理权限。",
-                "ManageServers" => "该角色具有服务器管理权限。",
-                "ManageUserRoles" => "该角色具有用户角色管理权限。",
-                "Customize" => "该角色具有自定义权限。",
-                "Login" => "该角色具有登录权限。",
+                "System" => "该角色具有系统权限",
+                "Bot" => "该角色具有应答机器人权限",
+                "Administrator" => "该角色具有管理员权限",
+                "Moderator" => "该角色具有版主权限",
+                "CoOrganizer" => "该角色具有协作组织权限",
+                "PremiumUser" => "该角色具有高级用户权限",
+                "User" => "该角色具有用户权限",
+                "Basic" => "该角色具有基本权限",
                 _ => role.Description
             };
 
