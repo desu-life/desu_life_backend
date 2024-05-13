@@ -1,4 +1,4 @@
-﻿namespace desu.life;
+﻿namespace desu.life.Settings;
 
 public class JwtSettings
 {
