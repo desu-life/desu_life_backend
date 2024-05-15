@@ -80,26 +80,6 @@ public class UserService : IUserService
                 Errors = isCreated.Errors.Select(p => p.Description)
             };
 
-        // 注册阶段不赋予基本角色，等待邮箱验证
-
-        // 赋予基本角色
-        // string[] baseRoles = ["Login", "Customize"]; // 基本权限
-        // foreach (var role in baseRoles)
-        // {
-        //     var addToRoleResult = await _userManager.AddToRoleAsync(newUser, role);
-        //     if (!addToRoleResult.Succeeded)
-        //         return new TokenResult { Errors = addToRoleResult.Errors.Select(p => p.Description) };
-        //
-        // }
-
-        // 赋予角色组
-        // var addToRoleGroupResult = await _userManager.AddToRoleAsync(newUser, "UserGroup"); // User用户组
-        // if (!addToRoleGroupResult.Succeeded)
-        //     return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
-        //
-        //
-        // var roles = await _userManager.GetRolesAsync(newUser);
-
         var emailSendResult = await SendEmailAsync(email);
         if (!emailSendResult.Success)
             return new TokenResult
@@ -133,14 +113,10 @@ public class UserService : IUserService
                 Errors = confirmResult.Errors.Select(p => p.Description)
             };
 
-        // 赋予角色与角色组
-        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["Login", "Customize"]);
+        // 赋予角色
+        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["User"]);
         if (!addToRolesResult.Succeeded)
             return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
-
-        var addToRoleGroupResult = await _userManager.AddToRoleAsync(existingUser, "UserGroup");
-        if (!addToRoleGroupResult.Succeeded)
-            return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
 
         return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }

@@ -12,8 +12,8 @@ using desu.life.Data;
 namespace desu.life.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240430062550_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240515054203_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,6 +173,9 @@ namespace desu.life.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<long>("RegisterTime")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
@@ -208,8 +211,8 @@ namespace desu.life.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)

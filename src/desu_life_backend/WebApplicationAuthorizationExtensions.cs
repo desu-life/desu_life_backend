@@ -3,6 +3,7 @@ using desu.life.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace desu.life;
 
@@ -109,32 +110,31 @@ public static class WebApplicationAuthorizationExtensions
 
     public static async Task UseDefaultPoliciesAsync(this WebApplication app)
     {
-        // 获取服务提供者
-        var serviceProvider = app.Services;
-
-        // 获取角色管理器
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
-
-        // 定义角色组
-        string[] roles =
-        [
-            "System", "Bot", "Administrator", "Moderator", "CoOrganizer",
-            "PremiumUser", "User", "Basic"
-        ];
-
-        // 创建角色
-        foreach (var role in roles)
+        using (var scope = app.Services.CreateScope())
         {
-            var roleExist = await roleManager.RoleExistsAsync(role);
-            // 如果角色不存在则创建
-            if (!roleExist)
-            {
-                await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
-            }
-        }
+            // 创建角色组
+            var serviceProvider = scope.ServiceProvider;
 
-        // 更新描述
-        await UpdateRoleDescription(roleManager);
+            // 获取角色管理器
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
+
+            // 定义角色组
+            string[] roles = [ "System", "Bot", "Administrator", "Moderator", "CoOrganizer", "PremiumUser", "User" ];
+
+            // 创建角色
+            foreach (var role in roles)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(role);
+                // 如果角色不存在则创建
+                if (!roleExist)
+                {
+                    await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
+                }
+            }
+
+            // 更新描述
+            await UpdateRoleDescription(roleManager);
+        }
     }
 
     private static async Task UpdateRoleDescription(RoleManager<DesulifeIdentityRole> roleManager)
@@ -158,7 +158,6 @@ public static class WebApplicationAuthorizationExtensions
                 "CoOrganizer" => "该角色具有协作组织权限",
                 "PremiumUser" => "该角色具有高级用户权限",
                 "User" => "该角色具有用户权限",
-                "Basic" => "该角色具有基本权限",
                 _ => role.Description
             };
 
