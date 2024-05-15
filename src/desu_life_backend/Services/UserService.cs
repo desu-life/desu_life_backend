@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace desu.life.Services;
@@ -19,6 +20,7 @@ namespace desu.life.Services;
 //https://www.cnblogs.com/xhznl/p/15406283.html
 public class UserService : IUserService
 {
+    private readonly ILogger<UserService> _logger;
     private readonly ApplicationDbContext _applicationDbContext;
     private readonly IConfiguration _configuration;
     private readonly IEmailSender _emailSender;
@@ -26,13 +28,14 @@ public class UserService : IUserService
     private readonly UserManager<DesuLifeIdentityUser> _userManager;
 
     public UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
-        UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender)
+        UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender, ILogger<UserService> logger)
     {
         _applicationDbContext = applicationDbContext;
         _jwtSettings = jwtSettings;
         _userManager = userManager;
         _configuration = configuration;
         _emailSender = emailSender;
+        _logger = logger;
     }
 
     public async Task<TokenResult> RegisterAsync(string username, string password, string email)
@@ -434,5 +437,27 @@ public class UserService : IUserService
     public async Task<List<Claim>> GetUserClaimsAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user)
     {
         return [.. (await userManager.GetClaimsAsync(user))];
+    }
+
+    // 绑定账号
+    public async Task LinkOsuAccount(int userId, string osuAccountId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
+        if (binding == null)
+        {
+            binding = new UserLink
+            {
+                UserId = userId,
+                Osu = osuAccountId
+            };
+            _applicationDbContext.UserLink.Add(binding);
+        }
+        else
+        {
+            binding.Osu = osuAccountId;
+            _applicationDbContext.UserLink.Update(binding);
+        }
+
+        await _applicationDbContext.SaveChangesAsync();
     }
 }

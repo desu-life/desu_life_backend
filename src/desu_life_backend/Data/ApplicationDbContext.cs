@@ -1,6 +1,7 @@
 ﻿using desu.life.Data.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace desu.life.Data;
 
@@ -12,6 +13,10 @@ public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, Desu
     }
 #nullable disable
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+    public DbSet<UserLink> UserLink { get; set; }
+
+
 #nullable enable
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

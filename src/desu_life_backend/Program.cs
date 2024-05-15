@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Configuration;
+using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;
@@ -98,6 +99,15 @@ public class Program
                 smtpSettings.Password, smtpSettings.Secure, smtpSettings.Sender);
         });
 
+
+        // osu
+        var osuSettings = builder.Configuration.GetSection(nameof(OsuSettings)).Get<OsuSettings>() ??
+                            throw new InvalidOperationException(
+                                $"Settings section '{nameof(OsuSettings)}' not found.");
+        builder.Services.AddSingleton(osuSettings);
+
+
+
         // Add services to the container.
         // builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddScoped<IUserService, UserService>();
@@ -109,7 +119,7 @@ public class Program
         // Swagger
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Desu.life API", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "desu.life API", Version = "v1" });
 
             // 添加 JWT 认证配置
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
