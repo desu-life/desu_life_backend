@@ -10,10 +10,11 @@ namespace desu.life.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(IUserService userService, OsuSettings osuSettings) : ControllerBase
+public class UserController(IUserService userService, OsuSettings osuSettings, DiscordSettings discordSettings) : ControllerBase
 {
     private readonly IUserService _userService = userService;
     private readonly OsuSettings _osuSettings = osuSettings;
+    private readonly DiscordSettings _discordSettings = discordSettings;
 
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterRequest request)
@@ -94,8 +95,18 @@ public class UserController(IUserService userService, OsuSettings osuSettings) :
     public IActionResult LinkOsu()
     {
         var osuAuthorizeUrl = "https://osu.ppy.sh/oauth/authorize";
-        var auth_link = $"{osuAuthorizeUrl}?client_id={_osuSettings.ClientID}&response_type=code&scope=public&redirect_uri=https://desu.life/api/callback/LinkOsu";
+        var authLink = $"{osuAuthorizeUrl}?client_id={_osuSettings.ClientID}&response_type=code&scope=public&redirect_uri=https://desu.life/api/callback/LinkOsu";
 
-        return Ok(new LinkOsuResponse { RedirectUrl = auth_link });
+        return Ok(new LinkResponse { RedirectUrl = authLink });
+    }
+
+    [HttpGet("LinkDiscord")]
+    [Authorize(Policy = "LinkAccount")]
+    public IActionResult LinkDiscord()
+    {
+        var discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
+        var authLink = $"{discordAuthorizeUrl}?client_id={_discordSettings.ClientID}&response_type=code&scope=identify&redirect_uri=https://desu.life/api/callback/LinkDiscord";
+
+        return Ok(new LinkResponse { RedirectUrl = authLink });
     }
 }

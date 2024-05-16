@@ -110,31 +110,29 @@ public static class WebApplicationAuthorizationExtensions
 
     public static async Task UseDefaultPoliciesAsync(this WebApplication app)
     {
-        using (var scope = app.Services.CreateScope())
+        using var scope = app.Services.CreateScope();
+        // 创建角色组
+        var serviceProvider = scope.ServiceProvider;
+
+        // 获取角色管理器
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
+
+        // 定义角色组
+        string[] roles = ["System", "Bot", "Administrator", "Moderator", "CoOrganizer", "PremiumUser", "User"];
+
+        // 创建角色
+        foreach (var role in roles)
         {
-            // 创建角色组
-            var serviceProvider = scope.ServiceProvider;
-
-            // 获取角色管理器
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
-
-            // 定义角色组
-            string[] roles = [ "System", "Bot", "Administrator", "Moderator", "CoOrganizer", "PremiumUser", "User" ];
-
-            // 创建角色
-            foreach (var role in roles)
+            var roleExist = await roleManager.RoleExistsAsync(role);
+            // 如果角色不存在则创建
+            if (!roleExist)
             {
-                var roleExist = await roleManager.RoleExistsAsync(role);
-                // 如果角色不存在则创建
-                if (!roleExist)
-                {
-                    await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
-                }
+                await roleManager.CreateAsync(new DesulifeIdentityRole { Name = role, Description = "" });
             }
-
-            // 更新描述
-            await UpdateRoleDescription(roleManager);
         }
+
+        // 更新描述
+        await UpdateRoleDescription(roleManager);
     }
 
     private static async Task UpdateRoleDescription(RoleManager<DesulifeIdentityRole> roleManager)

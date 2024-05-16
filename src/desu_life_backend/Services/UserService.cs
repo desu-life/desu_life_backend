@@ -460,4 +460,25 @@ public class UserService : IUserService
 
         await _applicationDbContext.SaveChangesAsync();
     }
+
+    public async Task LinkDiscordAccount(int userId, string discordAccountId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
+        if (binding == null)
+        {
+            binding = new UserLink
+            {
+                UserId = userId,
+                Discord = discordAccountId
+            };
+            _applicationDbContext.UserLink.Add(binding);
+        }
+        else
+        {
+            binding.Discord = discordAccountId;
+            _applicationDbContext.UserLink.Update(binding);
+        }
+
+        await _applicationDbContext.SaveChangesAsync();
+    }
 }

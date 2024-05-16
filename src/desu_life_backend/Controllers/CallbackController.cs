@@ -31,4 +31,22 @@ public class CallbackController(IUserService userService) : ControllerBase
         return Ok();
     }
 
+    [HttpGet("LinkDiscord")]
+    [Authorize(Policy = "LinkAccount")]
+    public async Task<IActionResult> LinkDiscordAsync()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        // TODO：从返回的数据中获取DiscordAccountId
+
+        var discordAccountId = "1";
+        await _userService.LinkDiscordAccount(int.Parse(userId), discordAccountId);
+
+        return Ok();
+    }
+
 }

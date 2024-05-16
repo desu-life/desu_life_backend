@@ -106,7 +106,11 @@ public class Program
                                 $"Settings section '{nameof(OsuSettings)}' not found.");
         builder.Services.AddSingleton(osuSettings);
 
-
+        // discord
+        var discordSettings = builder.Configuration.GetSection(nameof(DiscordSettings)).Get<DiscordSettings>() ??
+                            throw new InvalidOperationException(
+                                $"Settings section '{nameof(DiscordSettings)}' not found.");
+        builder.Services.AddSingleton(discordSettings);
 
         // Add services to the container.
         // builder.Services.AddTransient<IEmailSender, EmailSender>();
