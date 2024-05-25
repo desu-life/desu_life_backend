@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, Desu
 
     public DbSet<UserLink> UserLink { get; set; }
 
+    public DbSet<RedeemCode> RedeemCodes { get; set; }
 
 #nullable enable
 
