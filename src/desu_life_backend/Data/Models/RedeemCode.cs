@@ -7,11 +7,12 @@ namespace desu.life.Data.Models;
 
 public class RedeemCode
 {
+    [Key]
+    public string Code { get; set; } // 兑换码
+
     public string Issuer { get; set; }
 
     public string CodeType { get; set; } // 兑换码类型 比如促销码、礼包码、邀请码、激活码等
-
-    public string Code { get; set; } // 兑换码
 
     public string Item { get; set; } // 兑换码对应的物品，仅在兑换码类型需要兑换物品时有用
 

@@ -95,7 +95,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     public IActionResult LinkOsu()
     {
         var osuAuthorizeUrl = "https://osu.ppy.sh/oauth/authorize";
-        var authLink = $"{osuAuthorizeUrl}?client_id={_osuSettings.ClientID}&response_type=code&scope=public&redirect_uri=https://desu.life/api/callback/LinkOsu";
+        var authLink = $"{osuAuthorizeUrl}?client_id={_osuSettings.ClientID}&response_type=code&scope=public&redirect_uri={_osuSettings.RedirectUri}";
 
         return Ok(new LinkResponse { RedirectUrl = authLink });
     }
@@ -105,7 +105,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     public IActionResult LinkDiscord()
     {
         var discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
-        var authLink = $"{discordAuthorizeUrl}?client_id={_discordSettings.ClientID}&response_type=code&scope=identify&redirect_uri=https://desu.life/api/callback/LinkDiscord";
+        var authLink = $"{discordAuthorizeUrl}?client_id={_discordSettings.ClientID}&response_type=code&scope=identify&redirect_uri={_discordSettings.RedirectUri}";
 
         return Ok(new LinkResponse { RedirectUrl = authLink });
     }

@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Net.Http.Headers;
 using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
@@ -147,6 +148,30 @@ public class Program
                 }
             });
         });
+
+        // API
+        builder.Services.AddSingleton<API.OSU.API>();
+
+        // HttpClient
+        builder.Services.AddHttpClient("BaseHttpClient", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        builder.Services.AddHttpClient("OsuAPIBase", client =>
+        {
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.BaseAddress = new Uri("https://osu.ppy.sh/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+
+        builder.Services.AddHttpClient("DiscordAPIBase", client =>
+        {
+            client.BaseAddress = new Uri("https://discord.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
     }
 
     private static async Task ConfigureAsync(WebApplication app)

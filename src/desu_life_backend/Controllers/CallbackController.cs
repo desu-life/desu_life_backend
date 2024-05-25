@@ -1,6 +1,4 @@
-﻿using desu.life.Requests;
-using desu.life.Responses;
-using desu.life.Services;
+﻿using desu.life.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -9,24 +7,36 @@ namespace desu.life.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CallbackController(IUserService userService) : ControllerBase
+public class CallbackController(IUserService userService, ILogger<CallbackController> logger, API.OSU.API apiService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
+    private readonly ILogger _logger = logger;
+    private readonly API.OSU.API _apiService = apiService;
 
     [HttpGet("LinkOsu")]
-    [Authorize(Policy = "LinkAccount")]
-    public async Task<IActionResult> LinkOsuAsync()
+    // [Authorize(Policy = "LinkAccount")]
+    public async Task<IActionResult> LinkOsuAsync([FromQuery] string? code)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(code))
         {
-            return Unauthorized();
+            return BadRequest();
         }
 
-        // TODO：从返回的数据中获取osuAccountId
+        // 这里需要前端做一下token传递
+        var userId = "1";
+        // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        // if (userId == null)
+        // {
+        //     return Unauthorized();
+        // }
 
-        var osuAccountId = "1";
-        await _userService.LinkOsuAccount(int.Parse(userId), osuAccountId);
+        // 获取 osuAccountId
+        var osuAccountId = await _apiService.GetUserInfoByOAuthCodeAsync(code);
+
+        // 检测是否获取到 osuAccountId
+        if (osuAccountId == -1) return BadRequest();
+
+        await _userService.LinkOsuAccount(int.Parse(userId), osuAccountId.ToString());
 
         return Ok();
     }

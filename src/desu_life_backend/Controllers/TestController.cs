@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using desu.life.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using desu.life.Services.CDKeyservice;
 using System.Text;
 
 namespace desu.life.Controllers;
@@ -14,7 +14,7 @@ public class TestController : ControllerBase
     [HttpGet("cdkeytest")]
     public string Get()
     {
-        var cdkey = CDKeyservice.GenerateCDKey();
+        var cdkey = RedeemCodeGenerator.Generate();
         return $"Hello! Your CDKey is {cdkey}";
     }
 }
