@@ -1,17 +1,18 @@
 ﻿using desu.life.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace desu.life.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CallbackController(IUserService userService, ILogger<CallbackController> logger, API.OSU.API apiService) : ControllerBase
+public class CallbackController(IUserService userService, ILogger<CallbackController> logger, API.OSU osuApiService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
     private readonly ILogger _logger = logger;
-    private readonly API.OSU.API _apiService = apiService;
+    private readonly API.OSU _osuApiService = osuApiService;
 
     [HttpGet("LinkOsu")]
     // [Authorize(Policy = "LinkAccount")]
@@ -31,12 +32,12 @@ public class CallbackController(IUserService userService, ILogger<CallbackContro
         // }
 
         // 获取 osuAccountId
-        var osuAccountId = await _apiService.GetUserInfoByOAuthCodeAsync(code);
+        var osuAccountInfo = await _osuApiService.GetUserInfoOAuthAsync(code);
+        if (osuAccountInfo is null) return BadRequest();
 
-        // 检测是否获取到 osuAccountId
-        if (osuAccountId == -1) return BadRequest();
+        // _logger.LogInformation("Osu UID is {}.", osuAccountInfo.Id);
 
-        await _userService.LinkOsuAccount(int.Parse(userId), osuAccountId.ToString());
+        await _userService.LinkOsuAccount(int.Parse(userId), osuAccountInfo.Id.ToString());
 
         return Ok();
     }

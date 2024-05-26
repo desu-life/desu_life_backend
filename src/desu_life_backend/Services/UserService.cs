@@ -18,25 +18,18 @@ namespace desu.life.Services;
 
 //https://www.c-sharpcorner.com/article/securing-asp-net-core-web-api-with-jwt-authentication-and-role-based-authorizati/
 //https://www.cnblogs.com/xhznl/p/15406283.html
-public class UserService : IUserService
+public class UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
+    UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender,
+    ILogger<UserService> logger, OsuSettings osuSettings, DiscordSettings discordSettings) : IUserService
 {
-    private readonly ILogger<UserService> _logger;
-    private readonly ApplicationDbContext _applicationDbContext;
-    private readonly IConfiguration _configuration;
-    private readonly IEmailSender _emailSender;
-    private readonly JwtSettings _jwtSettings;
-    private readonly UserManager<DesuLifeIdentityUser> _userManager;
-
-    public UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
-        UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender, ILogger<UserService> logger)
-    {
-        _applicationDbContext = applicationDbContext;
-        _jwtSettings = jwtSettings;
-        _userManager = userManager;
-        _configuration = configuration;
-        _emailSender = emailSender;
-        _logger = logger;
-    }
+    private readonly ILogger<UserService> _logger = logger;
+    private readonly ApplicationDbContext _applicationDbContext = applicationDbContext;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly JwtSettings _jwtSettings = jwtSettings;
+    private readonly UserManager<DesuLifeIdentityUser> _userManager = userManager;
+    private readonly OsuSettings _osuSettings = osuSettings;
+    private readonly DiscordSettings _discordSettings = discordSettings;
 
     public async Task<TokenResult> RegisterAsync(string username, string password, string email)
     {
@@ -443,7 +436,7 @@ public class UserService : IUserService
     public async Task LinkOsuAccount(int userId, string osuAccountId)
     {
         var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
-        if (binding == null)
+        if (binding is null)
         {
             binding = new UserLink
             {
@@ -464,7 +457,7 @@ public class UserService : IUserService
     public async Task LinkDiscordAccount(int userId, string discordAccountId)
     {
         var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
-        if (binding == null)
+        if (binding is null)
         {
             binding = new UserLink
             {
@@ -482,4 +475,15 @@ public class UserService : IUserService
         await _applicationDbContext.SaveChangesAsync();
     }
 
+    public string GetOsuLinkUrl()
+    {
+        var osuAuthorizeUrl = "https://osu.ppy.sh/oauth/authorize";
+        return $"{osuAuthorizeUrl}?client_id={_osuSettings.ClientID}&response_type=code&scope=public&redirect_uri={_osuSettings.RedirectUri}";
+    }
+
+    public string GetDiscordLinkUrl()
+    {
+        var discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
+        return $"{discordAuthorizeUrl}?client_id={_discordSettings.ClientID}&response_type=code&scope=identify&redirect_uri={_discordSettings.RedirectUri}";
+    }
 }

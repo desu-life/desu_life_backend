@@ -13,4 +13,8 @@ public interface IUserService
     Task LinkOsuAccount(int userId, string osuAccountId);
 
     Task LinkDiscordAccount(int userId, string discordAccountId);
+
+    string GetOsuLinkUrl();
+
+    string GetDiscordLinkUrl();
 }

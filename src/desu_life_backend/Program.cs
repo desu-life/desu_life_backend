@@ -149,28 +149,9 @@ public class Program
             });
         });
 
-        // API
-        builder.Services.AddSingleton<API.OSU.API>();
+        // OSU API
+        builder.Services.AddSingleton<API.OSU>();
 
-        // HttpClient
-        builder.Services.AddHttpClient("BaseHttpClient", client =>
-        {
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-        builder.Services.AddHttpClient("OsuAPIBase", client =>
-        {
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.BaseAddress = new Uri("https://osu.ppy.sh/");
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-
-
-        builder.Services.AddHttpClient("DiscordAPIBase", client =>
-        {
-            client.BaseAddress = new Uri("https://discord.com/");
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
 
     }
 
