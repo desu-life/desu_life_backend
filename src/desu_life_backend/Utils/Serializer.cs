@@ -1,74 +1,57 @@
-using System.ComponentModel;
-using System.Globalization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Converters;
 using desu.life.Utils;
+using System.Text.Json;
+using System.Globalization;
+using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace desu.life.Serializer;
 
 public static class Json
 {
-    public static string Serialize(object? self) => JsonConvert.SerializeObject(self, Settings.Json);
-    public static string Serialize(object? self, Formatting format) => JsonConvert.SerializeObject(self, format);
-    public static T? Deserialize<T>(string json) => JsonConvert.DeserializeObject<T>(json, Settings.Json);
-    public static JObject ToLinq(string json) => JObject.Parse(json);
+    public static string Serialize(object? self) => JsonSerializer.Serialize(self, Settings.Json);
+    public static string Serialize<T>(T self, JsonSerializerOptions format) => JsonSerializer.Serialize(self, format);
+    public static T? Deserialize<T>(string json) => JsonSerializer.Deserialize<T>(json, Settings.Json);
 }
 
 internal static class Settings
 {
-    public static readonly JsonSerializerSettings Json = new()
+    public static readonly JsonSerializerOptions Json = new()
     {
-        MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-        DateParseHandling = DateParseHandling.None,
-        Formatting = Formatting.None,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = {
-            new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-        },
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
+            new JsonDescriptionConverter()
+        }
     };
 }
 
-public class JsonEnumConverter : JsonConverter
+public class JsonDescriptionConverter : JsonConverter<Enum>
 {
-    public override bool CanConvert(Type objectType)
+    public override Enum? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var enumType = Nullable.GetUnderlyingType(objectType) ?? objectType;
-        return enumType.IsEnum;
-    }
+        string? description = reader.GetString();
+        if (description == null) return null;
 
-    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-    {
-        if (reader.Value is long)
-            return Enum.ToObject(objectType, reader.Value);
-
-        string description = reader.Value?.ToString() ?? string.Empty;
-
-        if (description is null) return null;
-
-        foreach (var field in objectType.GetFields())
+        foreach (var field in typeToConvert.GetFields())
         {
             if (Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
             {
                 if (attribute.Description == description)
-                    return field.GetValue(null);
+                    return field.GetValue(null) as Enum;
             }
-            else
+            else if (field.Name.Equals(description, StringComparison.InvariantCultureIgnoreCase))
             {
-                if (field.Name == description)
-                    return field.GetValue(null);
+                return field.GetValue(null) as Enum;
             }
         }
 
-        throw new ArgumentException("Not found.", nameof(description));
+        throw new JsonException($"Unable to convert '{description}' to enum '{typeToConvert}'.");
     }
 
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    public override void Write(Utf8JsonWriter writer, Enum value, JsonSerializerOptions options)
     {
-        if (string.IsNullOrEmpty(value!.ToString()))
-        {
-            writer.WriteValue("");
-            return;
-        }
-        writer.WriteValue(DescriptionUtils.GetDescription(value));
+        var description = DescriptionUtils.GetDescription(value);
+        writer.WriteStringValue(description ?? value.ToString());
     }
 }
