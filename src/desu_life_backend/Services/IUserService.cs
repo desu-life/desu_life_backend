@@ -9,4 +9,12 @@ public interface IUserService
     Task<TokenResult> RefreshTokenAsync(string token, string refreshToken);
 
     Task<TokenResult> EmailConfirmAsync(string email, string token);
+
+    Task LinkOsuAccount(int userId, string osuAccountId);
+
+    Task LinkDiscordAccount(int userId, string discordAccountId);
+
+    string GetOsuLinkUrl();
+
+    string GetDiscordLinkUrl();
 }

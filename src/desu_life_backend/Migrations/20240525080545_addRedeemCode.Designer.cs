@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using desu.life.Data;
 
@@ -11,9 +12,11 @@ using desu.life.Data;
 namespace desu.life.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240525080545_addRedeemCode")]
+    partial class addRedeemCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -226,49 +229,6 @@ namespace desu.life.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
-                });
-
-            modelBuilder.Entity("desu.life.Data.Models.RedeemCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("AllowMultipleRedemptions")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("CodeType")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Issuer")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Item")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("ItemExpiration")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("RedeemedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("RedemptionCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RedemptionLimit")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("RedemptionStatus")
-                        .HasColumnType("tinyint(1)");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("RedeemCodes");
                 });
 
             modelBuilder.Entity("desu.life.Data.Models.RefreshToken", b =>

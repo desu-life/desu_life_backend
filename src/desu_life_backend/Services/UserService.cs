@@ -11,29 +11,25 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace desu.life.Services;
 
 //https://www.c-sharpcorner.com/article/securing-asp-net-core-web-api-with-jwt-authentication-and-role-based-authorizati/
 //https://www.cnblogs.com/xhznl/p/15406283.html
-public class UserService : IUserService
+public class UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
+    UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender,
+    ILogger<UserService> logger, OsuSettings osuSettings, DiscordSettings discordSettings) : IUserService
 {
-    private readonly ApplicationDbContext _applicationDbContext;
-    private readonly IConfiguration _configuration;
-    private readonly IEmailSender _emailSender;
-    private readonly JwtSettings _jwtSettings;
-    private readonly UserManager<DesuLifeIdentityUser> _userManager;
-
-    public UserService(ApplicationDbContext applicationDbContext, JwtSettings jwtSettings,
-        UserManager<DesuLifeIdentityUser> userManager, IConfiguration configuration, IEmailSender emailSender)
-    {
-        _applicationDbContext = applicationDbContext;
-        _jwtSettings = jwtSettings;
-        _userManager = userManager;
-        _configuration = configuration;
-        _emailSender = emailSender;
-    }
+    private readonly ILogger<UserService> _logger = logger;
+    private readonly ApplicationDbContext _applicationDbContext = applicationDbContext;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly IEmailSender _emailSender = emailSender;
+    private readonly JwtSettings _jwtSettings = jwtSettings;
+    private readonly UserManager<DesuLifeIdentityUser> _userManager = userManager;
+    private readonly OsuSettings _osuSettings = osuSettings;
+    private readonly DiscordSettings _discordSettings = discordSettings;
 
     public async Task<TokenResult> RegisterAsync(string username, string password, string email)
     {
@@ -80,26 +76,6 @@ public class UserService : IUserService
                 Errors = isCreated.Errors.Select(p => p.Description)
             };
 
-        // 注册阶段不赋予基本角色，等待邮箱验证
-
-        // 赋予基本角色
-        // string[] baseRoles = ["Login", "Customize"]; // 基本权限
-        // foreach (var role in baseRoles)
-        // {
-        //     var addToRoleResult = await _userManager.AddToRoleAsync(newUser, role);
-        //     if (!addToRoleResult.Succeeded)
-        //         return new TokenResult { Errors = addToRoleResult.Errors.Select(p => p.Description) };
-        //
-        // }
-
-        // 赋予角色组
-        // var addToRoleGroupResult = await _userManager.AddToRoleAsync(newUser, "UserGroup"); // User用户组
-        // if (!addToRoleGroupResult.Succeeded)
-        //     return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
-        //
-        //
-        // var roles = await _userManager.GetRolesAsync(newUser);
-
         var emailSendResult = await SendEmailAsync(email);
         if (!emailSendResult.Success)
             return new TokenResult
@@ -133,14 +109,10 @@ public class UserService : IUserService
                 Errors = confirmResult.Errors.Select(p => p.Description)
             };
 
-        // 赋予角色与角色组
-        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["Login", "Customize"]);
+        // 赋予角色
+        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["User"]);
         if (!addToRolesResult.Succeeded)
             return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
-
-        var addToRoleGroupResult = await _userManager.AddToRoleAsync(existingUser, "UserGroup");
-        if (!addToRoleGroupResult.Succeeded)
-            return new TokenResult { Errors = addToRoleGroupResult.Errors.Select(p => p.Description) };
 
         return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }
@@ -458,5 +430,60 @@ public class UserService : IUserService
     public async Task<List<Claim>> GetUserClaimsAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user)
     {
         return [.. (await userManager.GetClaimsAsync(user))];
+    }
+
+    // 绑定账号
+    public async Task LinkOsuAccount(int userId, string osuAccountId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
+        if (binding is null)
+        {
+            binding = new UserLink
+            {
+                UserId = userId,
+                Osu = osuAccountId
+            };
+            _applicationDbContext.UserLink.Add(binding);
+        }
+        else
+        {
+            binding.Osu = osuAccountId;
+            _applicationDbContext.UserLink.Update(binding);
+        }
+
+        await _applicationDbContext.SaveChangesAsync();
+    }
+
+    public async Task LinkDiscordAccount(int userId, string discordAccountId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
+        if (binding is null)
+        {
+            binding = new UserLink
+            {
+                UserId = userId,
+                Discord = discordAccountId
+            };
+            _applicationDbContext.UserLink.Add(binding);
+        }
+        else
+        {
+            binding.Discord = discordAccountId;
+            _applicationDbContext.UserLink.Update(binding);
+        }
+
+        await _applicationDbContext.SaveChangesAsync();
+    }
+
+    public string GetOsuLinkUrl()
+    {
+        var osuAuthorizeUrl = "https://osu.ppy.sh/oauth/authorize";
+        return $"{osuAuthorizeUrl}?client_id={_osuSettings.ClientID}&response_type=code&scope=public&redirect_uri={_osuSettings.RedirectUri}";
+    }
+
+    public string GetDiscordLinkUrl()
+    {
+        var discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
+        return $"{discordAuthorizeUrl}?client_id={_discordSettings.ClientID}&response_type=code&scope=identify&redirect_uri={_discordSettings.RedirectUri}";
     }
 }

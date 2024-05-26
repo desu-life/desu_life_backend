@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using desu.life.Data;
 
@@ -11,9 +12,11 @@ using desu.life.Data;
 namespace desu.life.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240515054203_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -228,49 +231,6 @@ namespace desu.life.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("desu.life.Data.Models.RedeemCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("AllowMultipleRedemptions")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("CodeType")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Issuer")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Item")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("ItemExpiration")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("RedeemedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("RedemptionCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RedemptionLimit")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("RedemptionStatus")
-                        .HasColumnType("tinyint(1)");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("RedeemCodes");
-                });
-
             modelBuilder.Entity("desu.life.Data.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -309,28 +269,6 @@ namespace desu.life.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
-                });
-
-            modelBuilder.Entity("desu.life.Data.Models.UserLink", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Discord")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("OneBot")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("OpenQQ")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Osu")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("UserLink");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -385,17 +323,6 @@ namespace desu.life.Migrations
                 });
 
             modelBuilder.Entity("desu.life.Data.Models.RefreshToken", b =>
-                {
-                    b.HasOne("desu.life.Data.Models.DesuLifeIdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("desu.life.Data.Models.UserLink", b =>
                 {
                     b.HasOne("desu.life.Data.Models.DesuLifeIdentityUser", "User")
                         .WithMany()

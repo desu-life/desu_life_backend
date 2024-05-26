@@ -1,20 +1,20 @@
 ﻿using desu.life.Requests;
 using desu.life.Responses;
 using desu.life.Services;
+using desu.life.Settings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace desu.life.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController : ControllerBase
+public class UserController(IUserService userService, OsuSettings osuSettings, DiscordSettings discordSettings) : ControllerBase
 {
-    private readonly IUserService _userService;
-
-    public UserController(IUserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly IUserService _userService = userService;
+    private readonly OsuSettings _osuSettings = osuSettings;
+    private readonly DiscordSettings _discordSettings = discordSettings;
 
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterRequest request)
@@ -33,24 +33,6 @@ public class UserController : ControllerBase
             RefreshToken = result.RefreshToken
         });
     }
-
-    // [HttpGet("EmailConfirm")]
-    // public async Task<IActionResult> EmailConfirm([FromQuery]string email, [FromQuery]string token)
-    // {
-    //     var result = await _userService.EmailConfirmAsync(email, token);
-    //     if (!result.Success)
-    //     {
-    //         return BadRequest(new FailedResponse()
-    //         {
-    //             Errors = result.Errors!
-    //         });
-    //     }
-    //     return Ok(new TokenResponse
-    //     {
-    //         AccessToken = result.AccessToken,
-    //         TokenType = result.TokenType
-    //     });
-    // }
 
     [HttpPost("EmailConfirm")]
     public async Task<IActionResult> EmailConfirm(EmailConfirmRequest request)
@@ -106,5 +88,19 @@ public class UserController : ControllerBase
             ExpiresIn = result.ExpiresIn,
             RefreshToken = result.RefreshToken
         });
+    }
+
+    [HttpGet("LinkOsu")]
+    [Authorize(Policy = "LinkAccount")]
+    public IActionResult LinkOsu()
+    {
+        return Ok(new LinkResponse { RedirectUrl = _userService.GetOsuLinkUrl() });
+    }
+
+    [HttpGet("LinkDiscord")]
+    [Authorize(Policy = "LinkAccount")]
+    public IActionResult LinkDiscord()
+    {
+        return Ok(new LinkResponse { RedirectUrl = _userService.GetDiscordLinkUrl() });
     }
 }

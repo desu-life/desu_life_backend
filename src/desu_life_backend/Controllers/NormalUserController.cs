@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace desu.life.Controllers;
 
+// roles = [ "System", "Bot", "Administrator", "Moderator", "CoOrganizer", "PremiumUser", "User" ];
+
 [ApiController]
 [Route("[controller]")]
 public class GuestController : ControllerBase
@@ -15,7 +17,7 @@ public class GuestController : ControllerBase
 }
 
 [ApiController]
-[Authorize] // 验证登录
+[Authorize(Roles = "User")] // 验证登录
 [Route("[controller]")]
 public class NormalUserController : ControllerBase
 {
@@ -27,7 +29,7 @@ public class NormalUserController : ControllerBase
 }
 
 [ApiController]
-[Authorize(Roles = "Admin")] // 验证管理员身份登录
+[Authorize(Roles = "Administrator")] // 验证管理员身份登录
 [Route("[controller]")]
 public class AdminController : ControllerBase
 {

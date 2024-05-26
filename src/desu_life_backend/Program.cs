@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Configuration;
+using System.Net.Http.Headers;
+using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;
@@ -10,6 +12,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace desu.life;
 
@@ -96,14 +99,19 @@ public class Program
             return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
                 smtpSettings.Password, smtpSettings.Secure, smtpSettings.Sender);
         });
-        // builder.Services.AddTransient<IEmailSender, EmailSender>(
-        //     provider =>
-        //     {
-        //         var smtpSettings = provider.GetRequiredService<SmtpSettings>();
-        //
-        //         return new EmailSender(smtpSettings.Host, smtpSettings.Port, smtpSettings.Username,
-        //             smtpSettings.Password, smtpSettings.Secure, smtpSettings.Sender);
-        //     });
+
+
+        // osu
+        var osuSettings = builder.Configuration.GetSection(nameof(OsuSettings)).Get<OsuSettings>() ??
+                            throw new InvalidOperationException(
+                                $"Settings section '{nameof(OsuSettings)}' not found.");
+        builder.Services.AddSingleton(osuSettings);
+
+        // discord
+        var discordSettings = builder.Configuration.GetSection(nameof(DiscordSettings)).Get<DiscordSettings>() ??
+                            throw new InvalidOperationException(
+                                $"Settings section '{nameof(DiscordSettings)}' not found.");
+        builder.Services.AddSingleton(discordSettings);
 
         // Add services to the container.
         // builder.Services.AddTransient<IEmailSender, EmailSender>();
@@ -112,7 +120,39 @@ public class Program
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+
+        // Swagger
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "desu.life API", Version = "v1" });
+
+            // 添加 JWT 认证配置
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer token\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+                {
+                    new OpenApiSecurityScheme{
+                        Reference = new OpenApiReference{
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
+
+        // OSU API
+        builder.Services.AddSingleton<API.OSU>();
+
+
     }
 
     private static async Task ConfigureAsync(WebApplication app)
