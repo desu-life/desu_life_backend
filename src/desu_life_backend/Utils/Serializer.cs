@@ -1,10 +1,8 @@
-using desu.life.Utils;
-using System.Text.Json;
-using System.Globalization;
 using System.ComponentModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace desu.life.Serializer;
+namespace desu.life.Utils;
 
 public static class Json
 {
@@ -19,7 +17,8 @@ internal static class Settings
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = {
+        Converters =
+        {
             new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
             new JsonDescriptionConverter()
         }

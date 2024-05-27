@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace desu.life.Data.Models;
 
+//TODO milki 240527: [StringLength(xx)] of strings
 public class UserLink
 {
     public string Osu { get; set; }

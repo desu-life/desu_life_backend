@@ -1,6 +1,6 @@
-namespace desu.life.Utils;
-
 using System.Text;
+
+namespace desu.life.Utils.RedeemCode;
 
 public static class RedeemCodeGenerator
 {

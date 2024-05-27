@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using desu.life.Data;
 using desu.life.Data.Models;
-using desu.life.Data;
 using Microsoft.EntityFrameworkCore;
 
 public class RedeemCodeService

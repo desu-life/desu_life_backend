@@ -1,8 +1,7 @@
-﻿using desu.life.Services;
+﻿using System.Security.Claims;
+using desu.life.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 namespace desu.life.Controllers;
 
