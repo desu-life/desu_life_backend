@@ -1,10 +1,10 @@
 ﻿#nullable disable
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace desu.life.Data.Models;
 
+//240527 todo: [StringLength(xx)] of strings
 public class RedeemCode
 {
     [Key]

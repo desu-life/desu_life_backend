@@ -1,8 +1,3 @@
-using desu.life.Settings;
-using Flurl;
-using Flurl.Http;
-using System.Net;
-
 namespace desu.life.API;
 
 public partial class OSU

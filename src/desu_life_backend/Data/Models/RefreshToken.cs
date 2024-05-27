@@ -9,9 +9,13 @@ public class RefreshToken
 {
     [Key] public int Id { get; set; }
 
-    [Required] [StringLength(128)] public string JwtId { get; set; }
+    [Required]
+    [StringLength(128)] 
+    public string JwtId { get; set; }
 
-    [Required] [StringLength(256)] public string Token { get; set; }
+    [Required]
+    [StringLength(256)] 
+    public string Token { get; set; }
 
     /// <summary>
     ///     是否使用，一个RefreshToken只能使用一次
@@ -25,11 +29,14 @@ public class RefreshToken
     [Required]
     public bool Invalidated { get; set; }
 
-    [Required] public DateTime CreationTime { get; set; }
+    [Required]
+    public DateTime CreationTime { get; set; }
 
-    [Required] public DateTime ExpiryTime { get; set; }
+    [Required] 
+    public DateTime ExpiryTime { get; set; }
 
-    [Required] public int UserId { get; set; }
+    [Required] 
+    public int UserId { get; set; }
 
     [Required]
     [ForeignKey(nameof(UserId))]

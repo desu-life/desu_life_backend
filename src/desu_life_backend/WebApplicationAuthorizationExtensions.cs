@@ -1,9 +1,5 @@
-﻿using System.Security.Claims;
-using desu.life.Data.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using desu.life.Data.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace desu.life;
 

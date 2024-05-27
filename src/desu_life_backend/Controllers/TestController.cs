@@ -1,7 +1,5 @@
-﻿using desu.life.Utils;
-using Microsoft.AspNetCore.Authorization;
+﻿using desu.life.Utils.RedeemCode;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 
 namespace desu.life.Controllers;
 

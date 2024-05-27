@@ -1,7 +1,5 @@
-﻿using Flurl;
+﻿using System.Text.Json;
 using Flurl.Http;
-using System.Text.Json;
-using static desu.life.API.OSU.Models;
 
 namespace desu.life.API;
 

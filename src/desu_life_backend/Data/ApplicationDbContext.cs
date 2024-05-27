@@ -1,7 +1,6 @@
 ﻿using desu.life.Data.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace desu.life.Data;
 

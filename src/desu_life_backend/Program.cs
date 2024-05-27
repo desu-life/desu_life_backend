@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Text;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;

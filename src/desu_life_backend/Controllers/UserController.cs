@@ -4,7 +4,6 @@ using desu.life.Services;
 using desu.life.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace desu.life.Controllers;
 
