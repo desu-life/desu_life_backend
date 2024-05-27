@@ -8,7 +8,7 @@ public partial class OSU
 {
     public partial class Models
     {
-        public class UserBaseStatistics
+        public abstract class UserStatisticsBase
         {
             [JsonPropertyName("level")]
             public Level Level { get; set; }
@@ -50,7 +50,7 @@ public partial class OSU
             public GradeCounts GradeCounts { get; set; }
         }
 
-        public class UserStatistics : UserBaseStatistics
+        public class UserStatistics : UserStatisticsBase
         {
             [JsonPropertyName("count_100")]
             public int Count100 { get; set; }

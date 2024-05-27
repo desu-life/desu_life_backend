@@ -7,7 +7,7 @@ public partial class OSU
 {
     public partial class Models
     {
-        public class BaseUser
+        public abstract class UserBase
         {
             [JsonPropertyName("avatar_url")]
             public string AvatarUrl { get; set; }
@@ -49,7 +49,7 @@ public partial class OSU
             public string Username { get; set; }
         }
 
-        public class BaseUserProfile : BaseUser
+        public class UserProfileBase : UserBase
         {
             [JsonPropertyName("cover_url")]
             public string CoverUrl { get; set; }
@@ -128,16 +128,16 @@ public partial class OSU
         }
 
         // 给OAuth用的
-        public class SelfProfile : BaseUserProfile
+        public class SelfProfile : UserProfileBase
         {
             [JsonPropertyName("statistics")]
-            public UserBaseStatistics Statistics { get; set; }
+            public UserStatisticsBase Statistics { get; set; }
 
             [JsonPropertyName("statistics_rulesets")]
-            public Dictionary<string, UserBaseStatistics> StatisticsRulesets { get; set; }
+            public Dictionary<string, UserStatisticsBase> StatisticsRulesets { get; set; }
         }
 
-        public class UserProfile : BaseUserProfile
+        public class UserProfile : UserProfileBase
         {
             [JsonPropertyName("account_history")]
             public List<string> AccountHistory { get; set; }
@@ -219,6 +219,15 @@ public partial class OSU
 
             [JsonPropertyName("statistics")]
             public UserStatistics Statistics { get; set; }
+        }
+
+        public class BeatmapScoreUser : UserBase
+        {
+            [JsonPropertyName("country")]
+            public Country Country { get; set; }
+
+            [JsonPropertyName("cover")]
+            public Cover Cover { get; set; }
         }
     }
 }

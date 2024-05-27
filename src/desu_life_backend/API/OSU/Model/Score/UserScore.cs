@@ -9,11 +9,8 @@ public partial class OSU
 {
     public partial class Models
     {
-        public class BeatmapScore : ScoreBase
+        public class UserScore : ScoreBase
         {
-            [JsonPropertyName("position")]
-            public int Position { get; set; }
-
             [JsonPropertyName("statistics")]
             public BeatmapStatistics Statistics { get; set; }
 
@@ -27,7 +24,7 @@ public partial class OSU
             public Beatmapset Beatmapset { get; set; }
 
             [JsonPropertyName("user")]
-            public BeatmapScoreUser User { get; set; }
+            public UserBase User { get; set; }
 
             [JsonPropertyName("weight")]
             public Weight Weight { get; set; }
