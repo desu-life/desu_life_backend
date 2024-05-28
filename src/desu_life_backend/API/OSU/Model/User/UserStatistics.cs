@@ -6,7 +6,7 @@ namespace desu.life.API;
 
 public partial class OSU
 {
-    public partial class Models
+    public static partial class Models
     {
         public abstract class UserStatisticsBase
         {

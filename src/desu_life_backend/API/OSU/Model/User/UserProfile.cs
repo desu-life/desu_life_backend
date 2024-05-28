@@ -7,7 +7,7 @@ public partial class OSU
 {
     public partial class Models
     {
-        public abstract class UserBase
+        public class UserBase
         {
             [JsonPropertyName("avatar_url")]
             public string AvatarUrl { get; set; }
@@ -47,9 +47,21 @@ public partial class OSU
 
             [JsonPropertyName("username")]
             public string Username { get; set; }
+
+            /// <summary>
+            /// 注：GetUserScores无此字段
+            /// </summary>
+            [JsonPropertyName("country")]
+            public Country Country { get; set; }
+
+            /// <summary>
+            /// 注：GetUserScores无此字段
+            /// </summary>
+            [JsonPropertyName("cover")]
+            public Cover Cover { get; set; }
         }
 
-        public class UserProfileBase : UserBase
+        public class UserProfile : UserBase
         {
             [JsonPropertyName("cover_url")]
             public string CoverUrl { get; set; }
@@ -102,43 +114,9 @@ public partial class OSU
             [JsonPropertyName("website")]
             public string Website { get; set; }
 
-            [JsonPropertyName("country")]
-            public Country Country { get; set; }
-
-            [JsonPropertyName("cover")]
-            public Cover Cover { get; set; }
-
-            [JsonPropertyName("is_restricted")]
-            public bool IsRestricted { get; set; }
-
             [JsonPropertyName("kudosu")]
             public Kudosu Kudosu { get; set; }
 
-            [JsonPropertyName("monthly_playcounts")]
-            public List<MonthlyPlaycount> MonthlyPlaycounts { get; set; }
-
-            [JsonPropertyName("page")]
-            public UserPage Page { get; set; }
-
-            [JsonPropertyName("user_achievements")]
-            public List<UserAchievement> UserAchievements { get; set; }
-
-            [JsonPropertyName("rank_history")]
-            public RankHistory RankHistory { get; set; }
-        }
-
-        // 给OAuth用的
-        public class SelfProfile : UserProfileBase
-        {
-            [JsonPropertyName("statistics")]
-            public UserStatisticsBase Statistics { get; set; }
-
-            [JsonPropertyName("statistics_rulesets")]
-            public Dictionary<string, UserStatisticsBase> StatisticsRulesets { get; set; }
-        }
-
-        public class UserProfile : UserProfileBase
-        {
             [JsonPropertyName("account_history")]
             public List<string> AccountHistory { get; set; }
 
@@ -178,8 +156,14 @@ public partial class OSU
             [JsonPropertyName("mapping_follower_count")]
             public int MappingFollowerCount { get; set; }
 
+            [JsonPropertyName("monthly_playcounts")]
+            public List<MonthlyPlaycount> MonthlyPlaycounts { get; set; }
+
             [JsonPropertyName("nominated_beatmapset_count")]
             public int NominatedBeatmapsetCount { get; set; }
+
+            [JsonPropertyName("page")]
+            public UserPage Page { get; set; }
 
             [JsonPropertyName("pending_beatmapset_count")]
             public int PendingBeatmapsetCount { get; set; }
@@ -208,26 +192,38 @@ public partial class OSU
             [JsonPropertyName("scores_recent_count")]
             public int ScoresRecentCount { get; set; }
 
+            [JsonPropertyName("statistics")]
+            public UserStatistics Statistics { get; set; }
+
             [JsonPropertyName("support_level")]
             public int SupportLevel { get; set; }
+
+            [JsonPropertyName("user_achievements")]
+            public List<UserAchievement> UserAchievements { get; set; }
+
+            [JsonPropertyName("rank_history")]
+            public RankHistory RankHistory { get; set; }
+
+            /// <summary>
+            /// caonima ppy
+            /// </summary>
+            [JsonPropertyName("rankHistory")]
+            public RankHistory RankHistoryOld { get; set; }
 
             [JsonPropertyName("ranked_and_approved_beatmapset_count")]
             public int RankedAndApprovedBeatmapsetCount { get; set; }
 
             [JsonPropertyName("unranked_beatmapset_count")]
             public int UnrankedBeatmapsetCount { get; set; }
-
-            [JsonPropertyName("statistics")]
-            public UserStatistics Statistics { get; set; }
         }
 
-        public class BeatmapScoreUser : UserBase
+        public class OAuthUserProfile : UserProfile
         {
-            [JsonPropertyName("country")]
-            public Country Country { get; set; }
+            [JsonPropertyName("is_restricted")]
+            public bool IsRestricted { get; set; }
 
-            [JsonPropertyName("cover")]
-            public Cover Cover { get; set; }
+            [JsonPropertyName("statistics_rulesets")]
+            public Dictionary<string, UserStatisticsBase> StatisticsRulesets { get; set; }
         }
     }
 }

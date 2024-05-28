@@ -27,7 +27,7 @@ public partial class OSU
             public Beatmapset Beatmapset { get; set; }
 
             [JsonPropertyName("user")]
-            public BeatmapScoreUser User { get; set; }
+            public UserBase User { get; set; }
 
             [JsonPropertyName("weight")]
             public Weight Weight { get; set; }
