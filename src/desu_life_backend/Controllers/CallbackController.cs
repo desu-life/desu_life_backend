@@ -7,11 +7,11 @@ namespace desu.life.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CallbackController(IUserService userService, ILogger<CallbackController> logger, API.OSUApi osuApiService) : ControllerBase
+public class CallbackController(IUserService userService, ILogger<CallbackController> logger, API.OsuClientV2 osuApiService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
     private readonly ILogger _logger = logger;
-    private readonly API.OSUApi _osuApiService = osuApiService;
+    private readonly API.OsuClientV2 _osuApiService = osuApiService;
 
     [HttpGet("LinkOsu")]
     // [Authorize(Policy = "LinkAccount")]

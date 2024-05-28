@@ -1,11 +1,11 @@
 ﻿using desu.life.Settings;
 using Flurl.Http;
+using Microsoft.Extensions.Logging;
 
 namespace desu.life.API;
 
-public partial class OSUApi(OsuSettings osuSettings, ILogger<OSUApi> logger)
+public partial class OsuClientV2(OsuSettings osuSettings, ILogger<OsuClientV2> logger)
 {
-    private readonly OsuSettings _osuSettings = osuSettings;
     private readonly ILogger _logger = logger;
 
 

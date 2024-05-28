@@ -1,17 +1,18 @@
 ﻿using System.Text.Json;
 using Flurl.Http;
+using Microsoft.Extensions.Logging;
 
 namespace desu.life.API;
 
-public partial class OSUApi
+public partial class OsuClientV2
 {
     private async Task<bool> GetPublicTokenAsync()
     {
         var requestData = new
         {
             grant_type = "client_credentials",
-            client_id = _osuSettings.ClientID,
-            client_secret = _osuSettings.ClientSecret,
+            client_id = osuSettings.ClientID,
+            client_secret = osuSettings.ClientSecret,
             scope = "public",
             code = "desu.life",
         };
@@ -63,10 +64,10 @@ public partial class OSUApi
         var requestData = new
         {
             grant_type = "authorization_code",
-            client_id = _osuSettings.ClientID,
-            client_secret = _osuSettings.ClientSecret,
+            client_id = osuSettings.ClientID,
+            client_secret = osuSettings.ClientSecret,
             code = _code,
-            redirect_uri = _osuSettings.RedirectUri,
+            redirect_uri = osuSettings.RedirectUri,
         };
 
 

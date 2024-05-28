@@ -148,7 +148,7 @@ public class Program
         });
 
         // OSU API
-        builder.Services.AddSingleton<API.OSUApi>();
+        builder.Services.AddSingleton<API.OsuClientV2>();
 
 
     }

@@ -4,7 +4,7 @@ using Flurl.Http;
 
 namespace desu.life.API;
 
-public partial class OSUApi
+public partial class OsuClientV2
 {
     public async Task<UserProfile?> GetUserInfoOAuthAsync(string code)
     {
