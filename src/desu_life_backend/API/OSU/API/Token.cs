@@ -3,7 +3,7 @@ using Flurl.Http;
 
 namespace desu.life.API;
 
-public partial class OSU
+public partial class OSUApi
 {
     private async Task<bool> GetPublicTokenAsync()
     {

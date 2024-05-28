@@ -1,10 +1,10 @@
+using desu.life.API.OSU.Models;
 using Flurl;
 using Flurl.Http;
-using static desu.life.API.OSU.Models;
 
 namespace desu.life.API;
 
-public partial class OSU
+public partial class OSUApi
 {
     public async Task<UserProfile?> GetUserInfoOAuthAsync(string code)
     {

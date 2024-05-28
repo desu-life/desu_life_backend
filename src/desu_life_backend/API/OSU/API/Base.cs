@@ -3,7 +3,7 @@ using Flurl.Http;
 
 namespace desu.life.API;
 
-public partial class OSU(OsuSettings osuSettings, ILogger<OSU> logger)
+public partial class OSUApi(OsuSettings osuSettings, ILogger<OSUApi> logger)
 {
     private readonly OsuSettings _osuSettings = osuSettings;
     private readonly ILogger _logger = logger;
