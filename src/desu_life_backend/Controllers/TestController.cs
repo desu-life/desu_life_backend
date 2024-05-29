@@ -62,7 +62,7 @@ public class TestController(IUserService userService, OsuClientV2 osuClientV2) :
     public async Task<string> GetUserBeatmapScoresAsync(long userId, long beatmap_id, string mode)
     {
         // 从osu!api获取用户在谱面上的成绩
-        var scores = await _osuClientV2.GetUserBeatmapScoresAsync(userId, beatmap_id, mode, 0, true);
+        var scores = await _osuClientV2.GetUserBeatmapScoresAsync(userId, beatmap_id, mode, 0);
         if (scores is null) return "null";
 
         return scores.ToJson();
@@ -72,7 +72,7 @@ public class TestController(IUserService userService, OsuClientV2 osuClientV2) :
     public async Task<string> GetUserBeatmapScoreAsync(long userId, long beatmap_id, string mode)
     {
         // 从osu!api获取用户在谱面上的成绩
-        var scores = await _osuClientV2.GetUserBeatmapScoresAsync(userId, beatmap_id, mode, 0, false);
+        var scores = await _osuClientV2.GetUserBeatmapScoreAsync(userId, beatmap_id, mode, 0);
         if (scores is null) return "null";
 
         return scores.ToJson();

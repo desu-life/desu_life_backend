@@ -26,8 +26,7 @@ public abstract class ScoreBase
     public GameMode Mode { get; set; }
 
     [JsonPropertyName("mode_int")]
-    [JsonConverter(typeof(JsonNumberEnumConverter<GameMode>))]
-    public GameMode ModeInt { get; set; }
+    public int ModeInt { get; set; }
 
     [JsonPropertyName("mods")]
     public List<string> Mods { get; set; }

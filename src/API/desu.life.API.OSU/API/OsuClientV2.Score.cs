@@ -30,7 +30,7 @@ public partial class OsuClientV2
         return await result.GetJsonAsync<List<Score>>();
     }
 
-    public async Task<List<Score>?> GetUserBeatmapScoresAsync(long osu_uid, long beatmap_id, string _mode, int _legacy_only, bool get_all)
+    public async Task<List<Score>?> GetUserBeatmapScoresAsync(long osu_uid, long beatmap_id, string _mode, int _legacy_only)
     {
         await CheckTokenAsync();
         if (token.IsExpired) return null;
@@ -42,22 +42,37 @@ public partial class OsuClientV2
                 legacy_only = _legacy_only,
             });
 
-        if (get_all) request.AppendPathSegments(["beatmaps", beatmap_id, "scores", "users", osu_uid, "all"]);
-        else request.AppendPathSegments(["beatmaps", beatmap_id, "scores", "users", osu_uid]);
+        request.AppendPathSegments(["beatmaps", beatmap_id, "scores", "users", osu_uid, "all"]);
+
 
         var result = await request.GetAsync();
         if (result.StatusCode == 404) return null;
 
-        if (get_all)
-        {
-            var scores = await result.GetJsonAsync<BeatmapScores>();
-            return scores.Scores;
-        }
-        else
-        {
-            var score = await result.GetJsonAsync<BeatmapUserScore>();
-            return [score.Score];
-        }
+
+        var scores = await result.GetJsonAsync<BeatmapScores>();
+        return scores.Scores;
+
+    }
+
+    public async Task<BeatmapUserScore?> GetUserBeatmapScoreAsync(long osu_uid, long beatmap_id, string _mode, int _legacy_only)
+    {
+        await CheckTokenAsync();
+        if (token.IsExpired) return null;
+
+        var request = OsuHttp().SetQueryParams(
+            new
+            {
+                mode = _mode,
+                legacy_only = _legacy_only,
+            });
+
+        request.AppendPathSegments(["beatmaps", beatmap_id, "scores", "users", osu_uid]);
+
+        var result = await request.GetAsync();
+        if (result.StatusCode == 404) return null;
+
+        var score = await result.GetJsonAsync<BeatmapUserScore>();
+        return score;
     }
 
     public async Task<List<Score>?> GetUserBestScoresAsync(long osu_uid, string mode, int limit, int offset = 0, int legacy_only = 0)

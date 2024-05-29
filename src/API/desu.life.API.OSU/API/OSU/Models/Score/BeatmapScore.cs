@@ -5,7 +5,7 @@ namespace desu.life.API.OSU.Models;
 public struct BeatmapUserScore
 {
     [JsonPropertyName("position")]
-    public required int Pos { get; set; }
+    public required int Position { get; set; }
 
     [JsonPropertyName("score")]
     public required Score Score { get; set; }
