@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using desu.life.API;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Services;
@@ -148,7 +149,7 @@ public class Program
         });
 
         // OSU API
-        builder.Services.AddSingleton<API.OSU>();
+        builder.Services.AddSingleton<API.OsuClientV2>();
 
 
     }

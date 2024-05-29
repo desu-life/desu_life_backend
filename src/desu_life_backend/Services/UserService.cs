@@ -485,4 +485,23 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
         var discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
         return $"{discordAuthorizeUrl}?client_id={_discordSettings.ClientID}&response_type=code&scope=identify&redirect_uri={_discordSettings.RedirectUri}";
     }
+
+    public async Task<string?> GetOsuAccount(int userId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
+        return binding?.Osu;
+    }
+
+    public async Task<string?> GetDiscordAccount(int userId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.UserId == userId);
+        return binding?.Discord;
+    }
+
+    public async Task<int?> GetUserIdByOsuAccount(string osuAccountId)
+    {
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.Osu == osuAccountId);
+        return binding?.UserId;
+    }
+
 }
