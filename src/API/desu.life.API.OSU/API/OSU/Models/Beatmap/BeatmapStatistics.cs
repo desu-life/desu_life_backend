@@ -16,10 +16,10 @@ public class BeatmapStatistics
     public int Count50 { get; set; }
 
     [JsonPropertyName("count_geki")]
-    public int CountGeki { get; set; }
+    public int? CountGeki { get; set; }
 
     [JsonPropertyName("count_katu")]
-    public int CountKatu { get; set; }
+    public int? CountKatu { get; set; }
 
     [JsonPropertyName("count_miss")]
     public int CountMiss { get; set; }

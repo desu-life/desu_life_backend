@@ -31,7 +31,7 @@ public class Beatmap
     public string Version { get; set; }
 
     [JsonPropertyName("accuracy")]
-    public int Accuracy { get; set; }
+    public double Accuracy { get; set; }
 
     [JsonPropertyName("ar")]
     public double Ar { get; set; }

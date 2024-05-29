@@ -17,4 +17,10 @@ public interface IUserService
     string GetOsuLinkUrl();
 
     string GetDiscordLinkUrl();
+
+    public Task<string?> GetOsuAccount(int userId);
+
+    public Task<string?> GetDiscordAccount(int userId);
+
+    public Task<int?> GetUserIdByOsuAccount(string osuAccountId);
 }

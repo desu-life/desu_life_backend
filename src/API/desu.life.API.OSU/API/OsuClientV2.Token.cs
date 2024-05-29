@@ -6,6 +6,12 @@ namespace desu.life.API;
 
 public partial class OsuClientV2
 {
+    private string _publicToken = "";
+    private string _lazerToken = "";
+
+    private long _publicTokenExpireTime = 0;
+    private long _lazerTokenExpireTime = 0;
+
     private async Task<bool> GetPublicTokenAsync()
     {
         var requestData = new
@@ -37,28 +43,6 @@ public partial class OsuClientV2
         }
     }
 
-    public async Task CheckPublicTokenAsync()
-    {
-        if (_publicTokenExpireTime == 0)
-        {
-            _logger.LogInformation("正在获取OSUApiV2_Token");
-            if (await GetPublicTokenAsync())
-            {
-                // _logger.LogInformation(string.Concat("获取成功, Token: ", _publicToken.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
-                _logger.LogInformation($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(_publicTokenExpireTime).DateTime.ToLocalTime()}");
-            }
-        }
-        else if (_publicTokenExpireTime <= DateTimeOffset.Now.ToUnixTimeSeconds())
-        {
-            _logger.LogInformation("OSUApiV2_Token已过期, 正在重新获取");
-            if (await GetPublicTokenAsync())
-            {
-                // _logger.LogInformation(string.Concat("获取成功, Token: ", _publicToken.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
-                _logger.LogInformation($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(_publicTokenExpireTime).DateTime.ToLocalTime()}");
-            }
-        }
-    }
-
     private async Task<string?> GetOauthTokenAsync(string _code)
     {
         var requestData = new
@@ -86,4 +70,25 @@ public partial class OsuClientV2
         }
     }
 
+    public async Task CheckOsuPublicTokenAsync()
+    {
+        if (_publicTokenExpireTime == 0)
+        {
+            _logger.LogInformation("正在获取OSUApiV2_Token");
+            if (await GetPublicTokenAsync())
+            {
+                // _logger.LogInformation(string.Concat("获取成功, Token: ", _publicToken.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
+                _logger.LogInformation($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(_publicTokenExpireTime).DateTime.ToLocalTime()}");
+            }
+        }
+        else if (_publicTokenExpireTime <= DateTimeOffset.Now.ToUnixTimeSeconds())
+        {
+            _logger.LogInformation("OSUApiV2_Token已过期, 正在重新获取");
+            if (await GetPublicTokenAsync())
+            {
+                // _logger.LogInformation(string.Concat("获取成功, Token: ", _publicToken.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
+                _logger.LogInformation($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(_publicTokenExpireTime).DateTime.ToLocalTime()}");
+            }
+        }
+    }
 }

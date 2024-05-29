@@ -8,20 +8,10 @@ public partial class OsuClientV2(OsuSettings osuSettings, ILogger<OsuClientV2> l
 {
     private readonly ILogger _logger = logger;
 
-
-    private string _publicToken = "";
-    private string _lazerToken = "";
-
-    private long _publicTokenExpireTime = 0;
-    private long _lazerTokenExpireTime = 0;
-
-    IFlurlRequest Http()
+    IFlurlRequest OsuHttp()
     {
-        // CheckToken().Wait();
-
         return _osuEndpointV2
         .WithOAuthBearerToken(_publicToken)
         .AllowHttpStatus("200,404");
     }
-
 }
