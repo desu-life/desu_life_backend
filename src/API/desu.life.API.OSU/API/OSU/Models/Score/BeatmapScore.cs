@@ -2,14 +2,18 @@
 
 namespace desu.life.API.OSU.Models;
 
-public class BeatmapScoreExtensions
+public struct BeatmapUserScore
 {
     [JsonPropertyName("position")]
-    public int? Position { get; set; }
+    public required int Pos { get; set; }
 
     [JsonPropertyName("score")]
-    public BeatmapScore? Score { get; set; }
+    public required Score Score { get; set; }
 
+}
+
+public struct BeatmapScores
+{
     [JsonPropertyName("scores")]
-    public List<BeatmapScore>? Scores { get; set; }
+    public required List<Score> Scores { get; set; }
 }

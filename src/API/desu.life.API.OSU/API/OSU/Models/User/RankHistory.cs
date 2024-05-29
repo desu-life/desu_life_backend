@@ -7,7 +7,8 @@ namespace desu.life.API.OSU.Models;
 public class RankHistory
 {
     [JsonPropertyName("mode")]
-    public string Mode { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public GameMode Mode { get; set; }
 
     [JsonPropertyName("data")]
     public List<int> Data { get; set; }

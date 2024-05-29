@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using desu.life.API.OSU.Models;
 using Flurl.Http;
 using Microsoft.Extensions.Logging;
 
@@ -6,13 +7,34 @@ namespace desu.life.API;
 
 public partial class OsuClientV2
 {
-    private string _publicToken = "";
-    private string _lazerToken = "";
+    public Token token = new();
 
-    private long _publicTokenExpireTime = 0;
-    private long _lazerTokenExpireTime = 0;
+    public class Token
+    {
+        public string? PublicToken { get; private set; } = null;
+        public string? RefreshToken { get; private set; } = null;
+        public long? PublicTokenExpireTime { get; private set; } = null;
 
-    private async Task<bool> GetPublicTokenAsync()
+        private long AdjustTokenExpire(long expiresIn)
+        {
+            return (long)(expiresIn - (expiresIn * 0.05));
+        }
+
+        public void Update(TokenResponse resp)
+        {
+            PublicToken = resp.AccessToken;
+            RefreshToken = resp.RefreshToken;
+            PublicTokenExpireTime =
+                AdjustTokenExpire(resp.ExpiresIn) + DateTimeOffset.Now.ToUnixTimeSeconds();
+        }
+
+        public bool IsExpired =>
+            PublicTokenExpireTime is null
+                ? true
+                : PublicTokenExpireTime <= DateTimeOffset.Now.ToUnixTimeSeconds();
+    }
+
+    private async Task<TokenResponse> UpdateTokenAsync()
     {
         var requestData = new
         {
@@ -24,26 +46,10 @@ public partial class OsuClientV2
         };
 
         var result = await _osuTokenEndpoint.PostJsonAsync(requestData);
-
-
-        var body = await result.GetJsonAsync<JsonElement>();
-        try
-        {
-            var token = body.GetProperty("access_token").GetString();
-            if (token is null) return false;
-            _publicToken = token;
-            _publicTokenExpireTime = DateTimeOffset.Now.ToUnixTimeSeconds()
-                                    + long.Parse((body.GetProperty("expires_in").ToString()) ?? "0");
-            return true;
-        }
-        catch
-        {
-            _logger.LogInformation("获取token失败, 返回Body: \n({})", body.ToString());
-            return false;
-        }
+        return await result.GetJsonAsync<TokenResponse>();
     }
 
-    private async Task<string?> GetOauthTokenAsync(string _code)
+    private async Task<TokenResponse> GetOauthTokenAsync(string _code)
     {
         var requestData = new
         {
@@ -54,40 +60,31 @@ public partial class OsuClientV2
             redirect_uri = osuSettings.RedirectUri,
         };
 
-
         var result = await _osuTokenEndpoint.PostJsonAsync(requestData);
-
-        var body = await result.GetJsonAsync<JsonElement>();
-        try
-        {
-            // 暂时没有结构体 先这样写
-            return body.GetProperty("access_token").GetString() ?? null;
-        }
-        catch
-        {
-            _logger.LogInformation("获取token失败, 返回Body: \n({})", body.ToString());
-            return null;
-        }
+        return await result.GetJsonAsync<TokenResponse>();
     }
 
-    public async Task CheckOsuPublicTokenAsync()
+    /// <summary>
+    /// 检查token过期，然后重新获取
+    /// </summary>
+    /// <returns>返回值是实际token可用状态</returns>
+    public async Task CheckTokenAsync()
     {
-        if (_publicTokenExpireTime == 0)
+        if (token.IsExpired)
         {
             _logger.LogInformation("正在获取OSUApiV2_Token");
-            if (await GetPublicTokenAsync())
+            try
             {
+                var resp = await UpdateTokenAsync();
+                token.Update(resp);
+                _logger.LogInformation(
+                    $"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(token.PublicTokenExpireTime!.Value).DateTime.ToLocalTime()}"
+                );
                 // _logger.LogInformation(string.Concat("获取成功, Token: ", _publicToken.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
-                _logger.LogInformation($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(_publicTokenExpireTime).DateTime.ToLocalTime()}");
             }
-        }
-        else if (_publicTokenExpireTime <= DateTimeOffset.Now.ToUnixTimeSeconds())
-        {
-            _logger.LogInformation("OSUApiV2_Token已过期, 正在重新获取");
-            if (await GetPublicTokenAsync())
+            catch (Exception ex)
             {
-                // _logger.LogInformation(string.Concat("获取成功, Token: ", _publicToken.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
-                _logger.LogInformation($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(_publicTokenExpireTime).DateTime.ToLocalTime()}");
+                logger.LogWarning("获取token失败, Error: \n({})", ex);
             }
         }
     }

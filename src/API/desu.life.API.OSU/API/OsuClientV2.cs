@@ -11,7 +11,7 @@ public partial class OsuClientV2(OsuSettings osuSettings, ILogger<OsuClientV2> l
     IFlurlRequest OsuHttp()
     {
         return _osuEndpointV2
-        .WithOAuthBearerToken(_publicToken)
+        .WithOAuthBearerToken(token.PublicToken)
         .AllowHttpStatus("200,404");
     }
 }

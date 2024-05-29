@@ -16,7 +16,8 @@ public class Beatmap
     public int Id { get; set; }
 
     [JsonPropertyName("mode")]
-    public string Mode { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public GameMode Mode { get; set; }
 
     [JsonPropertyName("status")]
     public string Status { get; set; }
@@ -70,7 +71,8 @@ public class Beatmap
     public DateTime LastUpdated { get; set; }
 
     [JsonPropertyName("mode_int")]
-    public int ModeInt { get; set; }
+    [JsonConverter(typeof(JsonNumberEnumConverter<GameMode>))]
+    public GameMode ModeInt { get; set; }
 
     [JsonPropertyName("passcount")]
     public int Passcount { get; set; }

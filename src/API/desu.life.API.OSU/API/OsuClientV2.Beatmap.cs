@@ -10,8 +10,8 @@ public partial class OsuClientV2
 {
     public async Task<Beatmap?> GetBeatmap(long beatmapId)
     {
-        await CheckOsuPublicTokenAsync();
-        if (_publicToken is null) return null;
+        await CheckTokenAsync();
+        if (token.IsExpired) return null;
 
         var result = await OsuHttp().AppendPathSegments(["beatmaps", beatmapId])
                                     .GetAsync();

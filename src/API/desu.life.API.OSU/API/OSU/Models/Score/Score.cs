@@ -22,10 +22,12 @@ public abstract class ScoreBase
     public int MaxCombo { get; set; }
 
     [JsonPropertyName("mode")]
-    public string Mode { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public GameMode Mode { get; set; }
 
     [JsonPropertyName("mode_int")]
-    public int ModeInt { get; set; }
+    [JsonConverter(typeof(JsonNumberEnumConverter<GameMode>))]
+    public GameMode ModeInt { get; set; }
 
     [JsonPropertyName("mods")]
     public List<string> Mods { get; set; }
@@ -53,4 +55,28 @@ public abstract class ScoreBase
 
     [JsonPropertyName("user_id")]
     public int UserId { get; set; }
+}
+
+public class Score : ScoreBase
+{
+    [JsonPropertyName("statistics")]
+    public ScoreStatistics Statistics { get; set; }
+
+    [JsonPropertyName("current_user_attributes")]
+    public CurrentUserAttributes CurrentUserAttributes { get; set; }
+
+    [JsonPropertyName("beatmap")]
+    public Beatmap Beatmap { get; set; }
+
+    [JsonPropertyName("beatmapset")]
+    public Beatmapset Beatmapset { get; set; }
+
+    [JsonPropertyName("user")]
+    public UserBase User { get; set; }
+
+    [JsonPropertyName("weight")]
+    public Weight Weight { get; set; }
+
+    public double CalcAccuracy => Statistics.Accuracy(Mode);
+    public double TotalHits => Statistics.TotalHits(Mode);
 }

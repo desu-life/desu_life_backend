@@ -9,11 +9,11 @@ namespace desu.life.API;
 
 public partial class OsuClientV2
 {
-    private async Task<List<BeatmapScore>?> GetUserScoresAsync(long osu_uid, string _mode, string type, int _legacy_only = 0,
+    private async Task<List<Score>?> GetUserScoresAsync(long osu_uid, string _mode, string type, int _legacy_only = 0,
                                                int _include_fails = 0, int _limit = 100, int _offset = 0)
     {
-        await CheckOsuPublicTokenAsync();
-        if (_publicToken is null) return null;
+        await CheckTokenAsync();
+        if (token.IsExpired) return null;
 
         var result = await OsuHttp().AppendPathSegments(["users", osu_uid, "scores", type])
                                     .SetQueryParams(new
@@ -27,13 +27,13 @@ public partial class OsuClientV2
                                     .GetAsync();
 
         if (result.StatusCode == 404) return null;
-        return await result.GetJsonAsync<List<BeatmapScore>>();
+        return await result.GetJsonAsync<List<Score>>();
     }
 
-    public async Task<List<BeatmapScore>?> GetUserBeatmapScoresAsync(long osu_uid, long beatmap_id, string _mode, int _legacy_only, bool get_all)
+    public async Task<List<Score>?> GetUserBeatmapScoresAsync(long osu_uid, long beatmap_id, string _mode, int _legacy_only, bool get_all)
     {
-        await CheckOsuPublicTokenAsync();
-        if (_publicToken is null) return null;
+        await CheckTokenAsync();
+        if (token.IsExpired) return null;
 
         var request = OsuHttp().SetQueryParams(
             new
@@ -42,7 +42,6 @@ public partial class OsuClientV2
                 legacy_only = _legacy_only,
             });
 
-        List<BeatmapScore> beatmapScore = [];
         if (get_all) request.AppendPathSegments(["beatmaps", beatmap_id, "scores", "users", osu_uid, "all"]);
         else request.AppendPathSegments(["beatmaps", beatmap_id, "scores", "users", osu_uid]);
 
@@ -51,32 +50,27 @@ public partial class OsuClientV2
 
         if (get_all)
         {
-            var scores = await result.GetJsonAsync<BeatmapScoreExtensions>();
-            if (scores.Scores is null) return null;
-            foreach (var score in scores.Scores) beatmapScore.Add(score);
+            var scores = await result.GetJsonAsync<BeatmapScores>();
+            return scores.Scores;
         }
         else
         {
-            var score = await result.GetJsonAsync<BeatmapScoreExtensions>();
-            if (score.Score is null) return null;
-            score.Score.Position = score.Position;
-            beatmapScore.Add(score.Score);
+            var score = await result.GetJsonAsync<BeatmapUserScore>();
+            return [score.Score];
         }
-
-        return beatmapScore;
     }
 
-    public async Task<List<BeatmapScore>?> GetUserBestScoresAsync(long osu_uid, string mode, int limit, int offset = 0, int legacy_only = 0)
+    public async Task<List<Score>?> GetUserBestScoresAsync(long osu_uid, string mode, int limit, int offset = 0, int legacy_only = 0)
     {
         return await GetUserScoresAsync(osu_uid, mode, "best", legacy_only, 0, limit, offset);
     }
 
-    public async Task<List<BeatmapScore>?> GetUserFirstScoresAsync(long osu_uid, string mode, int limit, int offset = 0, int legacy_only = 0)
+    public async Task<List<Score>?> GetUserFirstScoresAsync(long osu_uid, string mode, int limit, int offset = 0, int legacy_only = 0)
     {
         return await GetUserScoresAsync(osu_uid, mode, "firsts", legacy_only, 0, limit, offset);
     }
 
-    public async Task<List<BeatmapScore>?> GetUserRecentScoresAsync(long osu_uid, string mode, int include_fails, int limit, int offset = 0, int legacy_only = 0)
+    public async Task<List<Score>?> GetUserRecentScoresAsync(long osu_uid, string mode, int include_fails, int limit, int offset = 0, int legacy_only = 0)
     {
         return await GetUserScoresAsync(osu_uid, mode, "recent", legacy_only, include_fails, limit, offset);
     }
