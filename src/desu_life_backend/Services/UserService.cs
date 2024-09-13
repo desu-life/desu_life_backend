@@ -30,8 +30,10 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
     private readonly OsuSettings _osuSettings = osuSettings;
     private readonly DiscordSettings _discordSettings = discordSettings;
 
-    public async Task<TokenResult> RegisterAsync(string username, string password, string email)
+    public async Task<TokenResult> RegisterAsync( string password, string email)
     {
+        //TODO mc 此处将查找用户改为从登录上下文中读取
+        var username = "";
         var existingUser = await _userManager.FindByNameAsync(username);
 
         if (existingUser != null) // 非已验证邮箱用户重新注册

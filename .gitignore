@@ -400,3 +400,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/src/desu_life_backend/appsettings.json

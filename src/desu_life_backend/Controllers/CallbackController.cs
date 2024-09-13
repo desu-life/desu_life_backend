@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace desu.life.Controllers;
-
+/// <summary>
+/// 回调相关接口，用于使用回调信息绑定账号
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class CallbackController(IUserService userService, ILogger<CallbackController> logger, API.OsuClientV2 osuApiService) : ControllerBase
@@ -13,6 +15,11 @@ public class CallbackController(IUserService userService, ILogger<CallbackContro
     private readonly ILogger _logger = logger;
     private readonly API.OsuClientV2 _osuApiService = osuApiService;
 
+    /// <summary>
+    /// osu! OAuth2回调跳转后 确认绑定用户接口
+    /// </summary>
+    /// <param name="code">osu!跳转用户面板时URL携带的code</param>
+    /// <returns>空返回体</returns>
     [HttpGet("LinkOsu")]
     // [Authorize(Policy = "LinkAccount")]
     public async Task<IActionResult> LinkOsuAsync([FromQuery] string? code)
@@ -40,7 +47,11 @@ public class CallbackController(IUserService userService, ILogger<CallbackContro
 
         return Ok();
     }
-
+    /// <summary>
+    /// Discord OAuth2回调跳转后 确认绑定用户接口
+    /// </summary>
+    /// <param name="code">Discord跳转用户面板时URL携带的code</param>
+    /// <returns>空返回体</returns>
     [HttpGet("LinkDiscord")]
     [Authorize(Policy = "LinkAccount")]
     public async Task<IActionResult> LinkDiscordAsync()

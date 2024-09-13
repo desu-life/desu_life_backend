@@ -5,10 +5,13 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>desu.life</RootNamespace>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <DocumentationFile>SwaggerDoc.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Flurl.Http" Version="4.0.2" />
+        <PackageReference Include="IGeekFan.AspNetCore.Knife4jUI" Version="0.0.16" />
         <PackageReference Include="MailKit" Version="4.5.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />

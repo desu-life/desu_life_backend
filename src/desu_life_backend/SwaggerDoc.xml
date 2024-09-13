@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>desu_life_backend</name>
+    </assembly>
+    <members>
+        <member name="T:desu.life.Controllers.CallbackController">
+            <summary>
+            回调相关接口，用于使用回调信息绑定账号
+            </summary>
+        </member>
+        <member name="M:desu.life.Controllers.CallbackController.#ctor(desu.life.Services.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.CallbackController},desu.life.API.OsuClientV2)">
+            <summary>
+            回调相关接口，用于使用回调信息绑定账号
+            </summary>
+        </member>
+        <member name="M:desu.life.Controllers.CallbackController.LinkOsuAsync(System.String)">
+            <summary>
+            osu! OAuth2回调跳转后 确认绑定用户接口
+            </summary>
+            <param name="code">osu!跳转用户面板时URL携带的code</param>
+            <returns>空返回体</returns>
+        </member>
+        <member name="T:desu.life.Controllers.UserController">
+            <summary>
+            用户相关接口
+            </summary>
+        </member>
+        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.IUserService,desu.life.Settings.OsuSettings,desu.life.Settings.DiscordSettings)">
+            <summary>
+            用户相关接口
+            </summary>
+        </member>
+        <member name="P:desu.life.Data.Models.RefreshToken.Used">
+            <summary>
+                是否使用，一个RefreshToken只能使用一次
+            </summary>
+        </member>
+        <member name="P:desu.life.Data.Models.RefreshToken.Invalidated">
+            <summary>
+                是否失效。修改用户重要信息时可将此字段更新为true，使用户重新登录
+            </summary>
+        </member>
+        <member name="T:desu.life.Migrations.init">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.init.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.init.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.init.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:desu.life.Migrations.addUserLink">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.addUserLink.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.addUserLink.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.addUserLink.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:desu.life.Migrations.addRedeemCode">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.addRedeemCode.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.addRedeemCode.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.addRedeemCode.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:desu.life.Migrations.fixRedeemCode">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.fixRedeemCode.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.fixRedeemCode.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.fixRedeemCode.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:desu.life.Requests.RefreshTokenRequest">
+            <summary>
+                RefreshToken 请求参数
+            </summary>
+        </member>
+        <member name="T:desu.life.Responses.FailedResponse">
+            <summary>
+                登录、注册失败时返回错误信息
+            </summary>
+        </member>
+        <member name="T:desu.life.Responses.TokenResponse">
+            <summary>
+                注册、登录成功后返回 token
+            </summary>
+        </member>
+        <member name="M:desu.life.WebApplicationAuthorizationExtensions.AddDefaultAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+                初始化默认的Authorization
+            </summary>
+            <remarks>
+                Role为用户组，Policy为具体的功能。<br />
+                一般来说，Policy是否合法首先验证Role，其次验证对应User的Policy开关。<br />
+                示例中使用Claim实现User具体Policy开关，或者也可使用其他方式。
+            </remarks>
+            <param name="services"></param>
+            <example>
+                示例Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.<br />
+                示例Policies: ManageUsers, ManageServers, ManageUserRoles, etc.
+                <code>
+                    options.AddPolicy("RequireManageUsersRole", policy => policy
+                        .RequireRole("ServerAdmin")
+                        .RequireAssertion(k => !k.User.HasClaim("RequireManageUsersRole")
+                            // 基于Claim排除对应Policy，若Claim中存在对应Policy则该功能不可用
+                            // 同时需要api进行管理Claim: _userManager.AddClaimsAsync()
+                    );
+                </code>
+            </example>
+        </member>
+    </members>
+</doc>
