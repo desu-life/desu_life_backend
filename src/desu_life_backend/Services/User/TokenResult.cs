@@ -1,4 +1,4 @@
-﻿namespace desu.life.Services;
+﻿namespace desu.life.Services.User;
 
 public class TokenResult
 {

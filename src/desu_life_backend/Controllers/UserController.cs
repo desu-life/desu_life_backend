@@ -1,9 +1,10 @@
 ﻿using desu.life.Requests;
 using desu.life.Responses;
-using desu.life.Services;
+using desu.life.Services.User;
 using desu.life.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace desu.life.Controllers;
 /// <summary>
@@ -17,27 +18,24 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     private readonly OsuSettings _osuSettings = osuSettings;
     private readonly DiscordSettings _discordSettings = discordSettings;
 
+
     /// <summary>
     /// 用户补填邮箱、密码接口
     /// </summary>
     /// <param name="request">补填请求</param>
     /// <returns>空返回体</returns>
-    [HttpPost("Register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    [HttpPost("FillLoginInfo")]
+    public async Task<IActionResult> FillLoginInfo(FillLoginInfoRequest request)
     {
-        var result = await _userService.RegisterAsync(request.Password, request.Email);
-        if (!result.Success)
-            return BadRequest(new FailedResponse
-            {
-                Errors = result.Errors!
-            });
-        return Ok(new TokenResponse
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
         {
-            AccessToken = result.AccessToken,
-            TokenType = result.TokenType,
-            ExpiresIn = result.ExpiresIn,
-            RefreshToken = result.RefreshToken
-        });
+            return Unauthorized();
+        }
+
+        await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);
+        
+        return Ok();
     }
     /// <summary>
     /// 邮箱验证接口
@@ -85,6 +83,19 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
             RefreshToken = result.RefreshToken
         });
     }
+
+    /// <summary>
+    /// osu! OAuth2触发授权跳转接口
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("RedirectOsuLogin")]
+    public IActionResult RedirectOsuLogin()
+    {
+        return Ok(new LinkResponse { RedirectUrl = _userService.GetOsuLinkUrl() });
+    }
+
+
+
     /// <summary>
     /// 刷新Token接口
     /// </summary>
@@ -109,12 +120,8 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         });
     }
 
-    [HttpGet("LinkOsu")]
-    [Authorize(Policy = "LinkAccount")]
-    public IActionResult LinkOsu()
-    {
-        return Ok(new LinkResponse { RedirectUrl = _userService.GetOsuLinkUrl() });
-    }
+  
+
 
     [HttpGet("LinkDiscord")]
     [Authorize(Policy = "LinkAccount")]

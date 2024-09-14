@@ -6,7 +6,7 @@ namespace desu.life.Requests;
 /// <summary>
 /// 注册后补填信息请求
 /// </summary>
-public class RegisterRequest
+public class FillLoginInfoRequest
 {
     /// <summary>
     /// 登录密码

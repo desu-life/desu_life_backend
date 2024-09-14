@@ -2,8 +2,8 @@
 using desu.life.API;
 using desu.life.Data;
 using desu.life.Data.Models;
-using desu.life.Services;
 using desu.life.Services.Email;
+using desu.life.Services.User;
 using desu.life.Settings;
 using IGeekFan.AspNetCore.Knife4jUI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

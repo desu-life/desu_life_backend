@@ -4,6 +4,7 @@ namespace desu.life.API.OSU.Models;
 
 public class UserBase
 {
+    public UserBase() { }
     [JsonPropertyName("avatar_url")]
     public required string AvatarUrl { get; set; }
 

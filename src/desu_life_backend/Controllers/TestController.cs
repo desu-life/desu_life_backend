@@ -1,5 +1,5 @@
 ﻿using desu.life.API;
-using desu.life.Services;
+using desu.life.Services.User;
 using desu.life.Utils.RedeemCode;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol;

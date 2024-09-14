@@ -9,16 +9,23 @@
             回调相关接口，用于使用回调信息绑定账号
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.CallbackController.#ctor(desu.life.Services.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.CallbackController},desu.life.API.OsuClientV2)">
+        <member name="M:desu.life.Controllers.CallbackController.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.CallbackController},desu.life.API.OsuClientV2)">
             <summary>
             回调相关接口，用于使用回调信息绑定账号
             </summary>
         </member>
         <member name="M:desu.life.Controllers.CallbackController.LinkOsuAsync(System.String)">
             <summary>
-            osu! OAuth2回调跳转后 确认绑定用户接口
+            osu! OAuth2回调跳转后 自动登录/注册并绑定接口
             </summary>
             <param name="code">osu!跳转用户面板时URL携带的code</param>
+            <returns>空返回体</returns>
+        </member>
+        <member name="M:desu.life.Controllers.CallbackController.LinkDiscordAsync">
+            <summary>
+            Discord OAuth2回调跳转后 确认绑定用户接口
+            </summary>
+            <param name="code">Discord跳转用户面板时URL携带的code</param>
             <returns>空返回体</returns>
         </member>
         <member name="T:desu.life.Controllers.UserController">
@@ -26,10 +33,44 @@
             用户相关接口
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.IUserService,desu.life.Settings.OsuSettings,desu.life.Settings.DiscordSettings)">
+        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.Settings.DiscordSettings)">
             <summary>
             用户相关接口
             </summary>
+        </member>
+        <member name="M:desu.life.Controllers.UserController.FillLoginInfo(desu.life.Requests.FillLoginInfoRequest)">
+            <summary>
+            用户补填邮箱、密码接口
+            </summary>
+            <param name="request">补填请求</param>
+            <returns>空返回体</returns>
+        </member>
+        <member name="M:desu.life.Controllers.UserController.EmailConfirm(desu.life.Requests.EmailConfirmRequest)">
+            <summary>
+            邮箱验证接口
+            </summary>
+            <param name="request">验证请求</param>
+            <returns>空返回体</returns>
+        </member>
+        <member name="M:desu.life.Controllers.UserController.Login(desu.life.Requests.LoginRequest)">
+            <summary>
+            邮箱、密码登录接口
+            </summary>
+            <param name="request">登录请求</param>
+            <returns>Token信息</returns>
+        </member>
+        <member name="M:desu.life.Controllers.UserController.RedirectOsuLogin">
+            <summary>
+            osu! OAuth2触发授权跳转接口
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Controllers.UserController.RefreshToken(desu.life.Requests.RefreshTokenRequest)">
+            <summary>
+            刷新Token接口
+            </summary>
+            <param name="request">刷新请求</param>
+            <returns>Token信息</returns>
         </member>
         <member name="P:desu.life.Data.Models.RefreshToken.Used">
             <summary>
@@ -39,6 +80,16 @@
         <member name="P:desu.life.Data.Models.RefreshToken.Invalidated">
             <summary>
                 是否失效。修改用户重要信息时可将此字段更新为true，使用户重新登录
+            </summary>
+        </member>
+        <member name="T:desu.life.Error.ErrorCodes">
+            <summary>
+            错误码
+            </summary>
+        </member>
+        <member name="T:desu.life.Error.ErrorCodes.User">
+            <summary>
+            用户操作相关错误码
             </summary>
         </member>
         <member name="T:desu.life.Migrations.init">
@@ -88,6 +139,21 @@
         </member>
         <member name="M:desu.life.Migrations.fixRedeemCode.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
+        </member>
+        <member name="T:desu.life.Requests.FillLoginInfoRequest">
+            <summary>
+            注册后补填信息请求
+            </summary>
+        </member>
+        <member name="P:desu.life.Requests.FillLoginInfoRequest.Password">
+            <summary>
+            登录密码
+            </summary>
+        </member>
+        <member name="P:desu.life.Requests.FillLoginInfoRequest.Email">
+            <summary>
+            邮箱
+            </summary>
         </member>
         <member name="T:desu.life.Requests.RefreshTokenRequest">
             <summary>
