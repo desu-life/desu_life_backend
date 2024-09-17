@@ -1,4 +1,5 @@
 ﻿using desu.life.API;
+using desu.life.Responses;
 using desu.life.Services;
 using desu.life.Utils.RedeemCode;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,12 @@ public class TestController(IUserService userService, OsuClientV2 osuClientV2) :
     private readonly IUserService _userService = userService;
 
     private readonly OsuClientV2 _osuClientV2 = osuClientV2;
+
+    [HttpGet("errorTest")]
+    public string ErrorTest()
+    {
+        throw new Exception("This is a test error.");    
+    }
 
     [HttpGet("cdkeytest")]
     public string Get()
