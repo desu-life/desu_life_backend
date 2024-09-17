@@ -26,7 +26,7 @@ public class TestController(IUserService userService, OsuClientV2 osuClientV2) :
     }
 
     [HttpGet("cdkeytest")]
-    public R<string> Get()
+    public string Get()
     {
         var cdkey = RedeemCodeGenerator.Generate();
         return $"Hello! Your CDKey is {cdkey}";

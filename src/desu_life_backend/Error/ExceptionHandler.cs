@@ -15,8 +15,9 @@ namespace desu.life.Error
 
         public void OnException(ExceptionContext context)
         {
-            //异常返回结果包装
-            var rspResult = R<object>.Err(context.Exception.Message);
+            // 出现异常时，将结果包装为统一返回值
+            // 这里可以继续约定异常种类进行返回值的细化，目前只返回500状态码
+            var rspResult = UnifyResponse<object>.Err(context.Exception.Message);
             //日志记录
             _logger.LogError(context.Exception, context.Exception.Message);
             context.ExceptionHandled = true;

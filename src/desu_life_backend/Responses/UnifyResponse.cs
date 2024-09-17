@@ -1,6 +1,6 @@
 ﻿namespace desu.life.Responses
 {
-    public class R<T>
+    public class UnifyResponse<T>
 
     {
         /// <summary>
@@ -23,9 +23,9 @@
         /// </summary>
         /// <param name="data">返回的数据</param>
         /// <returns></returns>
-        public static R<T> Ok(T data)
+        public static UnifyResponse<T> Ok(T data)
         {
-            return new R<T> { Status = StatusCodes.Status200OK, Data = data };
+            return new UnifyResponse<T> { Status = StatusCodes.Status200OK, Data = data };
         }
 
         /// <summary>
@@ -33,9 +33,9 @@
         /// </summary>
         /// <param name="message">错误编码</param>
         /// <returns></returns>
-        public static R<T> Fail(string message)
+        public static UnifyResponse<T> Fail(string message)
         {
-            return new R<T> { Status = StatusCodes.Status400BadRequest, Message = message };
+            return new UnifyResponse<T> { Status = StatusCodes.Status400BadRequest, Message = message };
         }
 
         /// <summary>
@@ -43,18 +43,18 @@
         /// </summary>
         /// <param name="message">错误编码</param>
         /// <returns></returns>
-        public static R<T> Err(string message)
+        public static UnifyResponse<T> Err(string message)
         {
-            return new R<T> { Status = StatusCodes.Status500InternalServerError, Message = message };
+            return new UnifyResponse<T> { Status = StatusCodes.Status500InternalServerError, Message = message };
         }
 
         /// <summary>
         /// 自由组装返回结果
         /// </summary>
         /// <returns></returns>
-        public static R<T> Of(int status, T data, string? msg = null)
+        public static UnifyResponse<T> Of(int status, T data, string? msg = null)
         {
-            return new R<T> { Status = status, Data = data, Message = msg };
+            return new UnifyResponse<T> { Status = status, Data = data, Message = msg };
         }
 
 
@@ -62,7 +62,7 @@
         /// 隐式将T转化为R<T>
         /// </summary>
         /// <param name="value"></param>
-        public static implicit operator R<T>(T value)
+        public static implicit operator UnifyResponse<T>(T value)
         {
             return Ok(value);
         }

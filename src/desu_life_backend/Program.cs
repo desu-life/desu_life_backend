@@ -3,6 +3,7 @@ using desu.life.API;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Error;
+using desu.life.Responses;
 using desu.life.Services;
 using desu.life.Services.Email;
 using desu.life.Settings;
@@ -117,10 +118,11 @@ public class Program
         // builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddScoped<IUserService, UserService>();
 
-        // 注册全局异常过滤器
+        // 注册全局异常过滤器 和统一响应格式转换器
         builder.Services.AddControllers(options =>
         {
             options.Filters.Add<ExceptionHandler>();
+            options.Filters.Add<UnifyResponseFilter>();
         });
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
