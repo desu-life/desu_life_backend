@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace desu.life.Responses
 {
-    public class UnifyResponseFilter : ActionFilterAttribute
+    public class UnifiedResponseFilter : ActionFilterAttribute
     {
         public override void OnResultExecuting(ResultExecutingContext context)
         {
@@ -32,12 +32,12 @@ namespace desu.life.Responses
 
 
             //如果返回结果已经是UnifyResponse<T>类型的，则不需要进行再次包装了
-            if (objectResult.DeclaredType is { IsGenericType: true } && objectResult.DeclaredType?.GetGenericTypeDefinition() == typeof(UnifyResponse<>))
+            if (objectResult.DeclaredType is { IsGenericType: true } && objectResult.DeclaredType?.GetGenericTypeDefinition() == typeof(UnifiedResponse<>))
             {
                 return;
             }
 
-            context.Result = new ObjectResult(UnifyResponse<object>.Ok(objectResult.Value));
+            context.Result = new ObjectResult(UnifiedResponse<object>.Ok(objectResult.Value));
         }
     }
 }

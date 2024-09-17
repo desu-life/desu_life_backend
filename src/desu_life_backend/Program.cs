@@ -122,7 +122,7 @@ public class Program
         builder.Services.AddControllers(options =>
         {
             options.Filters.Add<ExceptionHandler>();
-            options.Filters.Add<UnifyResponseFilter>();
+            options.Filters.Add<UnifiedResponseFilter>();
         });
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
