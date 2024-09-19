@@ -5,6 +5,7 @@ using desu.life.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace desu.life.Controllers;
 /// <summary>
@@ -34,7 +35,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         }
 
         await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);
-        
+
         return Ok();
     }
     /// <summary>
@@ -45,19 +46,9 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     [HttpPost("EmailConfirm")]
     public async Task<IActionResult> EmailConfirm(EmailConfirmRequest request)
     {
-        var result = await _userService.EmailConfirmAsync(request.Email, request.Token);
-        if (!result.Success)
-            return BadRequest(new FailedResponse
-            {
-                Errors = result.Errors!
-            });
-        return Ok(new TokenResponse
-        {
-            AccessToken = result.AccessToken,
-            TokenType = result.TokenType,
-            ExpiresIn = result.ExpiresIn,
-            RefreshToken = result.RefreshToken
-        });
+        await _userService.EmailConfirmAsync(request.Email, request.Token);
+
+        return Ok();
     }
 
     /// <summary>

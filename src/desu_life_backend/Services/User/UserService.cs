@@ -81,6 +81,13 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
 
             // 由于是osu!回调创建，直接关联osu账号
             await LinkOsuAccount(user.Id, osuId);
+
+            // 赋予角色
+            var addToRolesResult = await _userManager.AddToRolesAsync(user, ["User"]);
+            if (!addToRolesResult.Succeeded)
+                return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
+
+            return await GenerateJwtTokenAsync(user, await _userManager.GetRolesAsync(user));
         }
 
 
@@ -123,35 +130,27 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
 
     }
 
-    public async Task<TokenResult> EmailConfirmAsync(string email, string token)
+    public async Task EmailConfirmAsync(string email, string token)
     {
         var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
         var existingUser = await _userManager.FindByEmailAsync(decodedEmail);
         if (existingUser == null)
-            return new TokenResult
-            {
-                Errors = new[] { "user does not exist!" }
-            };
+        {
+            throw new InvalidOperationException(ErrorCodes.User.UserNotExists);
+        }
+
         if (existingUser.EmailConfirmed)
-            return new TokenResult
-            {
-                Errors = new[] { "email already confirmed!" }
-            };
+            throw new InvalidOperationException(ErrorCodes.User.EmailAlreadyConfirmed);
 
         var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
         var confirmResult = await _userManager.ConfirmEmailAsync(existingUser, decodedToken);
         if (!confirmResult.Succeeded)
-            return new TokenResult
-            {
-                Errors = confirmResult.Errors.Select(p => p.Description)
-            };
+        {
+            _logger.LogError(confirmResult.Errors.First().Description);
+            throw new InvalidOperationException(ErrorCodes.User.EmailConfirmFailed);
+        }
 
-        // 赋予角色
-        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["User"]);
-        if (!addToRolesResult.Succeeded)
-            return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
-
-        return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }
 
 

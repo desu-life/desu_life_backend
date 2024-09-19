@@ -12,6 +12,10 @@
         {
             public const string EmailExists = "EMAIL_EXISTS";
             public const string EmailSendFailed = "EMAIL_SEND_FAILED";
+            public const string UserNotExists = "USER_NOT_EXISTS";
+            public const string EmailAlreadyConfirmed =  "EMAIL_ALREADY_CONFIRMED";
+            public const string EmailConfirmFailed =  "EMAIL_CONFIRM_FAILED";
+
         }
     }
 
