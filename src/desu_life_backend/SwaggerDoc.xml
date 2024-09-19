@@ -4,24 +4,36 @@
         <name>desu_life_backend</name>
     </assembly>
     <members>
-        <member name="T:desu.life.Controllers.CallbackController">
+        <member name="T:desu.life.Controllers.ThirdPartyOAuth2Controller">
             <summary>
-            回调相关接口，用于使用回调信息绑定账号
+            第三方平台OAuth2相关接口，用于生成第三方平台跳转链接、根据回调code获取第三方平台用户信息
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.CallbackController.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.CallbackController},desu.life.API.OsuClientV2)">
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.ThirdPartyOAuth2Controller},desu.life.API.OsuClientV2)">
             <summary>
-            回调相关接口，用于使用回调信息绑定账号
+            第三方平台OAuth2相关接口，用于生成第三方平台跳转链接、根据回调code获取第三方平台用户信息
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.CallbackController.LinkOsuAsync(System.String)">
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.RedirectOsuLogin">
+            <summary>
+            osu! OAuth2触发授权跳转接口
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.RedirectDiscordOAuth">
+            <summary>
+            Discord OAuth2触发授权跳转接口
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.LinkOsuAsync(System.String)">
             <summary>
             osu! OAuth2回调跳转后 自动登录/注册并绑定接口
             </summary>
             <param name="code">osu!跳转用户面板时URL携带的code</param>
             <returns>空返回体</returns>
         </member>
-        <member name="M:desu.life.Controllers.CallbackController.LinkDiscordAsync">
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.LinkDiscordAsync">
             <summary>
             Discord OAuth2回调跳转后 确认绑定用户接口
             </summary>
@@ -58,12 +70,6 @@
             </summary>
             <param name="request">登录请求</param>
             <returns>Token信息</returns>
-        </member>
-        <member name="M:desu.life.Controllers.UserController.RedirectOsuLogin">
-            <summary>
-            osu! OAuth2触发授权跳转接口
-            </summary>
-            <returns></returns>
         </member>
         <member name="M:desu.life.Controllers.UserController.RefreshToken(desu.life.Requests.RefreshTokenRequest)">
             <summary>

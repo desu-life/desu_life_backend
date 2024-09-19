@@ -85,18 +85,6 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     }
 
     /// <summary>
-    /// osu! OAuth2触发授权跳转接口
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("RedirectOsuLogin")]
-    public IActionResult RedirectOsuLogin()
-    {
-        return Ok(new LinkResponse { RedirectUrl = _userService.GetOsuLinkUrl() });
-    }
-
-
-
-    /// <summary>
     /// 刷新Token接口
     /// </summary>
     /// <param name="request">刷新请求</param>
@@ -120,13 +108,5 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         });
     }
 
-  
-
-
-    [HttpGet("LinkDiscord")]
-    [Authorize(Policy = "LinkAccount")]
-    public IActionResult LinkDiscord()
-    {
-        return Ok(new LinkResponse { RedirectUrl = _userService.GetDiscordLinkUrl() });
-    }
+    //TODO 获取用户个人信息接口
 }
