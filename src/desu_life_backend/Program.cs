@@ -2,6 +2,8 @@
 using desu.life.API;
 using desu.life.Data;
 using desu.life.Data.Models;
+using desu.life.Error;
+using desu.life.Responses;
 using desu.life.Services.Email;
 using desu.life.Services.User;
 using desu.life.Settings;
@@ -170,9 +172,13 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseRouting();
+
             app.UseSwagger();
-            //app.UseSwaggerUI();
-      
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+
             app.UseKnife4UI(c =>
             {
                 c.RoutePrefix = ""; // serve the UI at root

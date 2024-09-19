@@ -75,7 +75,7 @@ public class ThirdPartyOAuth2Controller(IUserService userService, ILogger<ThirdP
     /// <returns>空返回体</returns>
     [HttpGet("LinkDiscord")]
     [Authorize(Policy = "LinkAccount")]
-    public async Task<IActionResult> LinkDiscordAsync()
+    public async Task<IActionResult> LinkDiscordAsync([FromQuery] string? code)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
