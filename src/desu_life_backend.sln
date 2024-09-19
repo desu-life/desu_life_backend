@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "desu_life_backend", "desu_l
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{42A1D068-D503-4428-9DFB-0EF77959E86D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desu.life.API.OSU", "API\desu.life.API.OSU\desu.life.API.OSU.csproj", "{9484C9A6-414C-453C-B745-231131F1EEA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "desu.life.API.OSU", "API\desu.life.API.OSU\desu.life.API.OSU.csproj", "{9484C9A6-414C-453C-B745-231131F1EEA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desu.life.API.DISCORD", "desu.life.API.DISCORD\desu.life.API.DISCORD.csproj", "{753E0008-5D4D-4D6A-BA02-15717203E559}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +25,17 @@ Global
 		{9484C9A6-414C-453C-B745-231131F1EEA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9484C9A6-414C-453C-B745-231131F1EEA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9484C9A6-414C-453C-B745-231131F1EEA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{753E0008-5D4D-4D6A-BA02-15717203E559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{753E0008-5D4D-4D6A-BA02-15717203E559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{753E0008-5D4D-4D6A-BA02-15717203E559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{753E0008-5D4D-4D6A-BA02-15717203E559}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9484C9A6-414C-453C-B745-231131F1EEA5} = {42A1D068-D503-4428-9DFB-0EF77959E86D}
+		{753E0008-5D4D-4D6A-BA02-15717203E559} = {42A1D068-D503-4428-9DFB-0EF77959E86D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CA500865-E32E-4054-A62A-A9E11A055769}
