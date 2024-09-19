@@ -6,14 +6,17 @@ using System.Text;
 using System.Text.Encodings.Web;
 using desu.life.Data;
 using desu.life.Data.Models;
+using desu.life.Error;
 using desu.life.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using static desu.life.Error.ErrorCodes;
 
-namespace desu.life.Services;
+namespace desu.life.Services.User;
 
 //https://www.c-sharpcorner.com/article/securing-asp-net-core-web-api-with-jwt-authentication-and-role-based-authorizati/
 //https://www.cnblogs.com/xhznl/p/15406283.html
@@ -29,92 +32,127 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
     private readonly UserManager<DesuLifeIdentityUser> _userManager = userManager;
     private readonly OsuSettings _osuSettings = osuSettings;
     private readonly DiscordSettings _discordSettings = discordSettings;
-
-    public async Task<TokenResult> RegisterAsync(string username, string password, string email)
+    public async Task<TokenResult> RegisterOrLogin(string username, string osuId)
     {
-        var existingUser = await _userManager.FindByNameAsync(username);
+        // 从UserLink查找用户
+        var binding = await _applicationDbContext.UserLink.FirstOrDefaultAsync(b => b.Osu == osuId);
 
-        if (existingUser != null) // 非已验证邮箱用户重新注册
+        DesuLifeIdentityUser user = null;
+
+        //如果存在则更新用户名为osu!用户名
+        if (binding != null)
         {
+            user = await _userManager.FindByIdAsync(binding.UserId.ToString());
+
+            if (user != null)
+            {
+                if (user.UserName != username)
+                {
+                    user.UserName = username;
+                    var result = await _userManager.UpdateAsync(user);
+                    if (!result.Succeeded)
+                        return new TokenResult
+                        {
+                            Errors = result.Errors.Select(p => p.Description)
+                        };
+                }
+            }
+
+        }
+        // 否则使用osu!用户名创建用户
+        else
+        {
+            user = new DesuLifeIdentityUser
+            {
+                UserName = username,
+                Email = null,
+                RegisterTime = DateTimeOffset.Now.ToUnixTimeSeconds()
+            };
+
+            // 创建的用户不带密码，密码在稍后补填邮箱密码时设置
+            var isCreated = await _userManager.CreateAsync(user);
+
+            if (!isCreated.Succeeded)
+                return new TokenResult
+                {
+                    Errors = isCreated.Errors.Select(p => p.Description)
+                };
+
+
+            // 由于是osu!回调创建，直接关联osu账号
+            await LinkOsuAccount(user.Id, osuId);
+
+            // 赋予角色
+            var addToRolesResult = await _userManager.AddToRolesAsync(user, ["User"]);
+            if (!addToRolesResult.Succeeded)
+                return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
+
+            return await GenerateJwtTokenAsync(user, await _userManager.GetRolesAsync(user));
+        }
+
+
+        return await GenerateJwtTokenAsync(user, await _userManager.GetRolesAsync(user));
+    }
+
+    public async Task FillLoginInfo(int userId, string password, string email)
+    {
+
+        var existingUser = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (existingUser != null) // 非已验证邮箱用户，则触发邮箱验证
+        {
+
+            // 生成密码重置令牌
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
+
+            // 使用令牌直接设置密码
+            var result = await _userManager.ResetPasswordAsync(existingUser, resetToken, password);
+
+            if (result.Succeeded)
+            {
+                throw new InvalidOperationException(ErrorCodes.User.EmailSendFailed);
+            }
+
+            // 发送验证邮件
             if (!existingUser.EmailConfirmed)
             {
                 var existingUserEmailSendResult = await SendEmailAsync(email);
                 if (!existingUserEmailSendResult.Success)
-                    return new TokenResult
-                    {
-                        Errors = new[] { "user already exists but email not confirmed! and email send failed!" }
-                    };
-
-                return new TokenResult
                 {
-                    Errors = new[]
-                    {
-                        "user already exists but email not confirmed! a new confirmation email has been sent to your email address."
-                    }
-                };
+                    throw new InvalidOperationException(ErrorCodes.User.EmailSendFailed);
+                }
             }
 
-            return new TokenResult
-            {
-                Errors = new[] { "user already exists!" }
-            };
+            throw new InvalidOperationException(ErrorCodes.User.EmailExists);
+
         }
 
-        var newUser = new DesuLifeIdentityUser
-        {
-            UserName = username,
-            Email = email,
-            RegisterTime = DateTimeOffset.Now.ToUnixTimeSeconds()
-        };
 
-        var isCreated = await _userManager.CreateAsync(newUser, password);
-
-        if (!isCreated.Succeeded)
-            return new TokenResult
-            {
-                Errors = isCreated.Errors.Select(p => p.Description)
-            };
-
-        var emailSendResult = await SendEmailAsync(email);
-        if (!emailSendResult.Success)
-            return new TokenResult
-            {
-                Errors = new[] { "email send failed!" }
-            };
-
-        return await GenerateJwtTokenAsync(newUser, await _userManager.GetRolesAsync(newUser));
     }
 
-    public async Task<TokenResult> EmailConfirmAsync(string email, string token)
+    public async Task EmailConfirmAsync(string email, string token)
     {
         var decodedEmail = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(email));
         var existingUser = await _userManager.FindByEmailAsync(decodedEmail);
         if (existingUser == null)
-            return new TokenResult
-            {
-                Errors = new[] { "user does not exist!" }
-            };
+        {
+            throw new InvalidOperationException(ErrorCodes.User.UserNotExists);
+        }
+
         if (existingUser.EmailConfirmed)
-            return new TokenResult
-            {
-                Errors = new[] { "email already confirmed!" }
-            };
+            throw new InvalidOperationException(ErrorCodes.User.EmailAlreadyConfirmed);
 
         var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
         var confirmResult = await _userManager.ConfirmEmailAsync(existingUser, decodedToken);
         if (!confirmResult.Succeeded)
-            return new TokenResult
-            {
-                Errors = confirmResult.Errors.Select(p => p.Description)
-            };
+        {
+            _logger.LogError(confirmResult.Errors.First().Description);
+            throw new InvalidOperationException(ErrorCodes.User.EmailConfirmFailed);
+        }
 
-        // 赋予角色
-        var addToRolesResult = await _userManager.AddToRolesAsync(existingUser, ["User"]);
-        if (!addToRolesResult.Succeeded)
-            return new TokenResult { Errors = addToRolesResult.Errors.Select(p => p.Description) };
-
-        return await GenerateJwtTokenAsync(existingUser, await _userManager.GetRolesAsync(existingUser));
     }
+
 
     public async Task<TokenResult> LoginAsync(string email, string password)
     {

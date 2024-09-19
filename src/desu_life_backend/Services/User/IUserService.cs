@@ -1,14 +1,15 @@
-﻿namespace desu.life.Services;
+﻿namespace desu.life.Services.User;
 
 public interface IUserService
 {
-    Task<TokenResult> RegisterAsync(string username, string password, string email);
+    Task<TokenResult> RegisterOrLogin(string username, string osuId);
+    Task FillLoginInfo(int userId, string password, string email);
 
     Task<TokenResult> LoginAsync(string username, string password);
 
     Task<TokenResult> RefreshTokenAsync(string token, string refreshToken);
 
-    Task<TokenResult> EmailConfirmAsync(string email, string token);
+    Task EmailConfirmAsync(string email, string token);
 
     Task LinkOsuAccount(int userId, string osuAccountId);
 
