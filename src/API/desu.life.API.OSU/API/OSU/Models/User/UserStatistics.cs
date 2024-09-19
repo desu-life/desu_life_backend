@@ -6,6 +6,7 @@ namespace desu.life.API.OSU.Models;
 
 public abstract class UserStatisticsBase
 {
+    public UserStatisticsBase(){}
     [JsonPropertyName("level")]
     public Level Level { get; set; }
 

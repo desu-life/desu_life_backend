@@ -4,6 +4,7 @@ namespace desu.life.API.OSU.Models;
 
 public class UserBase
 {
+    public UserBase() { }
     [JsonPropertyName("avatar_url")]
     public required string AvatarUrl { get; set; }
 
@@ -219,5 +220,5 @@ public class OAuthUserProfile : UserProfile
     public required bool IsRestricted { get; set; }
 
     [JsonPropertyName("statistics_rulesets")]
-    public required Dictionary<string, UserStatisticsBase> StatisticsRulesets { get; set; }
+    public required Dictionary<string, UserStatistics> StatisticsRulesets { get; set; }
 }

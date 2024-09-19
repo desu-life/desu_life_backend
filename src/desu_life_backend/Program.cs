@@ -2,11 +2,10 @@
 using desu.life.API;
 using desu.life.Data;
 using desu.life.Data.Models;
-using desu.life.Error;
-using desu.life.Responses;
-using desu.life.Services;
 using desu.life.Services.Email;
+using desu.life.Services.User;
 using desu.life.Settings;
+using IGeekFan.AspNetCore.Knife4jUI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -132,7 +131,7 @@ public class Program
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "desu.life API", Version = "v1" });
-
+            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "SwaggerDoc.xml"), true);
             // 添加 JWT 认证配置
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -170,8 +169,21 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
+            app.UseRouting();
             app.UseSwagger();
-            app.UseSwaggerUI();
+            //app.UseSwaggerUI();
+      
+            app.UseKnife4UI(c =>
+            {
+                c.RoutePrefix = ""; // serve the UI at root
+                c.SwaggerEndpoint("/v1/api-docs", "V1 Docs");
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapSwagger("{documentName}/api-docs");
+            });
         }
 
         app.UseHttpsRedirection();
