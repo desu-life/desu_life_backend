@@ -9,7 +9,7 @@
             第三方平台OAuth2相关接口，用于生成第三方平台跳转链接、根据回调code获取第三方平台用户信息
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.ThirdPartyOAuth2Controller},desu.life.API.OsuClientV2)">
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.ThirdPartyOAuth2Controller},desu.life.API.OsuClientV2,desu.life.API.DISCORD.DiscordClient)">
             <summary>
             第三方平台OAuth2相关接口，用于生成第三方平台跳转链接、根据回调code获取第三方平台用户信息
             </summary>

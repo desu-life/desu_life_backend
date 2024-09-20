@@ -182,8 +182,9 @@ public class Program
             });
         });
 
-        // OSU API
+        // 第三方OAuth2 API 客户端
         builder.Services.AddSingleton<API.OsuClientV2>();
+        builder.Services.AddSingleton<API.DISCORD.DiscordClient>();
 
 
     }
