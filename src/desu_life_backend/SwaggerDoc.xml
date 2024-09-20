@@ -205,6 +205,20 @@
             <param name="message">错误编码</param>
             <returns></returns>
         </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.UnAuthorized">
+            <summary>
+            权限不足返回结果
+            </summary>
+            <param name="message">错误编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.UnAuthenticated">
+            <summary>
+            未认证返回结果
+            </summary>
+            <param name="message">错误编码</param>
+            <returns></returns>
+        </member>
         <member name="M:desu.life.Responses.UnifiedResponse`1.Err(System.String)">
             <summary>
             异常状态返回结果

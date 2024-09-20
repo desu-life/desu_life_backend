@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using desu.life.API;
 using desu.life.Data;
 using desu.life.Data.Models;
@@ -35,12 +36,14 @@ public class Program
 
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
+        // 配置数据库
         connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(connectionString, new MariaDbServerVersion(new Version(10, 11, 7)))
         );
 
+        // 指定用户类型，配置需要电子邮件确认才能登录
         builder.Services
             .AddIdentityCore<DesuLifeIdentityUser>(config =>
             {
@@ -55,6 +58,7 @@ public class Program
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
 
         // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
+        // 指定角色管理服务
         builder.Services
             .AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
         builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
@@ -84,6 +88,27 @@ public class Program
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.SecurityKey)),
                     ClockSkew = TimeSpan.Zero
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    // 权限不足
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        var result = JsonSerializer.Serialize(UnifiedResponse<object>.UnAuthorized());                        
+                        return context.Response.WriteAsync(result);
+                    },
+                    // 未登录
+                    OnForbidden = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+                        var result = JsonSerializer.Serialize(UnifiedResponse<object>.UnAuthenticated());
+                        return context.Response.WriteAsync(result);
+                    }
+                };
+
             });
 
         // Services.EmailSender

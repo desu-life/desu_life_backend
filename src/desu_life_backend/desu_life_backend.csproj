@@ -29,6 +29,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\API\desu.life.API.OSU\desu.life.API.OSU.csproj" />
+      <ProjectReference Include="..\desu.life.API.DISCORD\desu.life.API.DISCORD.csproj" />
     </ItemGroup>
 
 </Project>

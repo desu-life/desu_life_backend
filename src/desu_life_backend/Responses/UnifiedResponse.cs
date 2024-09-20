@@ -1,4 +1,6 @@
-﻿namespace desu.life.Responses
+﻿using desu.life.Error;
+
+namespace desu.life.Responses
 {
     public class UnifiedResponse<T>
 
@@ -36,6 +38,26 @@
         public static UnifiedResponse<T> Fail(string message)
         {
             return new UnifiedResponse<T> { Status = StatusCodes.Status400BadRequest, Message = message };
+        }
+
+        /// <summary>
+        /// 权限不足返回结果
+        /// </summary>
+        /// <param name="message">错误编码</param>
+        /// <returns></returns>
+        public static UnifiedResponse<T> UnAuthorized()
+        {
+            return new UnifiedResponse<T> { Status = StatusCodes.Status401Unauthorized, Message = ErrorCodes.Common.UnAuthorized };
+        }
+
+        /// <summary>
+        /// 未认证返回结果
+        /// </summary>
+        /// <param name="message">错误编码</param>
+        /// <returns></returns>
+        public static UnifiedResponse<T> UnAuthenticated()
+        {
+            return new UnifiedResponse<T> { Status = StatusCodes.Status403Forbidden, Message = ErrorCodes.Common.UnAuthenticated };
         }
 
         /// <summary>

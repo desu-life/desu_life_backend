@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using desu.life.API.DISCORD;
 using desu.life.Data.Models;
 using desu.life.Responses;
 using desu.life.Services.User;
@@ -12,11 +13,13 @@ namespace desu.life.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
-public class ThirdPartyOAuth2Controller(IUserService userService, ILogger<ThirdPartyOAuth2Controller> logger, API.OsuClientV2 osuApiService) : ControllerBase
+public class ThirdPartyOAuth2Controller(
+    IUserService userService,
+    ILogger<ThirdPartyOAuth2Controller> logger,
+    API.OsuClientV2 osuApiService, 
+    DiscordClient discordClient) : ControllerBase
 {
     private readonly IUserService _userService = userService;
-    private readonly ILogger _logger = logger;
-    private readonly API.OsuClientV2 _osuApiService = osuApiService;
 
     /// <summary>
     /// osu! OAuth2触发授权跳转接口
@@ -55,7 +58,7 @@ public class ThirdPartyOAuth2Controller(IUserService userService, ILogger<ThirdP
         }
 
         // 获取 osu!账号信息
-        var osuAccountInfo = await _osuApiService.GetUserInfoOAuthAsync(code);
+        var osuAccountInfo = await osuApiService.GetUserInfoOAuthAsync(code);
         if (osuAccountInfo is null) return BadRequest();
 
         var result = await userService.RegisterOrLogin(osuAccountInfo.Username, osuAccountInfo.Id.ToString());
@@ -83,9 +86,9 @@ public class ThirdPartyOAuth2Controller(IUserService userService, ILogger<ThirdP
             return Unauthorized();
         }
 
-        // TODO：从返回的数据中获取DiscordAccountId
+        var discordUserInfo = await discordClient.GetUserInfoOAuthAsync(code);
 
-        var discordAccountId = "1";
+        var discordAccountId = discordUserInfo.Id;
         await _userService.LinkDiscordAccount(int.Parse(userId), discordAccountId);
 
         return Ok();
