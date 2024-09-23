@@ -509,7 +509,7 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
             var linkArchive = new UserLinkArchive
             {
                 UserId = userId,
-                Platform = binding.Osu,
+                Platform = "Discord",
                 ArchiveTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
                 LinkInfoArchive = binding.Discord
             };
