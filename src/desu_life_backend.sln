@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{42A1D068-D50
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "desu.life.API.OSU", "API\desu.life.API.OSU\desu.life.API.OSU.csproj", "{9484C9A6-414C-453C-B745-231131F1EEA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desu.life.API.DISCORD", "desu.life.API.DISCORD\desu.life.API.DISCORD.csproj", "{753E0008-5D4D-4D6A-BA02-15717203E559}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desu.life.API.DISCORD", "API\desu.life.API.DISCORD\desu.life.API.DISCORD.csproj", "{753E0008-5D4D-4D6A-BA02-15717203E559}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

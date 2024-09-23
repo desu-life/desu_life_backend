@@ -506,6 +506,15 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
         }
         else
         {
+            var linkArchive = new UserLinkArchive
+            {
+                UserId = userId,
+                Platform = binding.Osu,
+                ArchiveTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                LinkInfoArchive = binding.Discord
+            };
+            _applicationDbContext.UserLinkArchive.Add(linkArchive);
+
             binding.Discord = discordAccountId;
             _applicationDbContext.UserLink.Update(binding);
         }

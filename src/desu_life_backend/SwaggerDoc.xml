@@ -146,6 +146,18 @@
         <member name="M:desu.life.Migrations.fixRedeemCode.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:desu.life.Migrations.UserLinkArchive">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.UserLinkArchive.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.UserLinkArchive.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.UserLinkArchive.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:desu.life.Requests.FillLoginInfoRequest">
             <summary>
             注册后补填信息请求

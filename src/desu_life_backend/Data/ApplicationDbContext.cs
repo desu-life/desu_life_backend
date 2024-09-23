@@ -17,6 +17,8 @@ public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, Desu
 
     public DbSet<RedeemCode> RedeemCodes { get; set; }
 
+    public DbSet<UserLinkArchive> UserLinkArchive { get; set; }
+
 #nullable enable
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
