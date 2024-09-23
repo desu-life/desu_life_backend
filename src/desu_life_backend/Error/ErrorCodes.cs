@@ -23,6 +23,11 @@
             public const string UserNotExists = "USER_NOT_EXISTS";
             public const string EmailAlreadyConfirmed = "EMAIL_ALREADY_CONFIRMED";
             public const string EmailConfirmFailed = "EMAIL_CONFIRM_FAILED";
+            public const string OAuth2CodeNotSupplied = "OAUTH2_CODE_NOT_SUPPLIED";
+
+
+
+
 
         }
     }

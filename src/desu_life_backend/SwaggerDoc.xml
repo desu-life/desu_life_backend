@@ -45,7 +45,7 @@
             用户相关接口
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.Settings.DiscordSettings)">
+        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.API.DISCORD.Settings.DiscordSettings)">
             <summary>
             用户相关接口
             </summary>
@@ -190,6 +190,12 @@
             <summary>
             返回结果
             </summary>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.Ok">
+            <summary>
+            成功状态返回结果
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:desu.life.Responses.UnifiedResponse`1.Ok(`0)">
             <summary>

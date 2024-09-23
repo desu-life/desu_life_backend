@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using desu.life.API.DISCORD;
 using desu.life.Data.Models;
+using desu.life.Error;
 using desu.life.Responses;
 using desu.life.Services.User;
 using Microsoft.AspNetCore.Authorization;
@@ -78,20 +79,19 @@ public class ThirdPartyOAuth2Controller(
     /// <returns>空返回体</returns>
     [HttpGet("LinkDiscord")]
     [Authorize(Policy = "LinkAccount")]
-    public async Task<IActionResult> LinkDiscordAsync([FromQuery] string? code)
+    public async Task LinkDiscordAsync([FromQuery] string? code)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
         {
-            return Unauthorized();
+            throw new InvalidOperationException(ErrorCodes.User.OAuth2CodeNotSupplied);
         }
 
         var discordUserInfo = await discordClient.GetUserInfoOAuthAsync(code);
 
         var discordAccountId = discordUserInfo.Id;
         await _userService.LinkDiscordAccount(int.Parse(userId), discordAccountId);
-
-        return Ok();
+        
     }
 
 }

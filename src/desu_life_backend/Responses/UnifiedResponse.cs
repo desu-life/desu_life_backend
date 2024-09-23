@@ -23,6 +23,16 @@ namespace desu.life.Responses
         /// <summary>
         /// 成功状态返回结果
         /// </summary>
+        /// <returns></returns>
+        public static UnifiedResponse<T> Ok()
+        {
+            return new UnifiedResponse<T> { Status = StatusCodes.Status200OK };
+        }
+
+
+        /// <summary>
+        /// 成功状态返回结果
+        /// </summary>
         /// <param name="data">返回的数据</param>
         /// <returns></returns>
         public static UnifiedResponse<T> Ok(T data)

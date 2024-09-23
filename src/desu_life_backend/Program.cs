@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using desu.life.API;
+using desu.life.API.DISCORD.Settings;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Error;
