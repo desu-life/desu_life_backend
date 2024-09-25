@@ -18,12 +18,20 @@ namespace desu.life.Responses
                 return;
             }
 
+            // 返回void时 是EmptyResult
+            if (context.Result is EmptyResult emptyResult)
+            {
+                context.Result = new ObjectResult(UnifiedResponse<object>.Ok());
+                return;
+            }
+
             /*
             如果返回不是往输出流里扔对象，则不做转换
             例如文件下载是FileResult;
             又或者使用.net core自带IResult相关实现修改状态码;
             或者直接返回ControllerBase.Ok()
             */
+
             if (context.Result is not ObjectResult objectResult) return;
 
 

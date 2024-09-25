@@ -9,7 +9,7 @@
             第三方平台OAuth2相关接口，用于生成第三方平台跳转链接、根据回调code获取第三方平台用户信息
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.ThirdPartyOAuth2Controller},desu.life.API.OsuClientV2)">
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.#ctor(desu.life.Services.User.IUserService,Microsoft.Extensions.Logging.ILogger{desu.life.Controllers.ThirdPartyOAuth2Controller},desu.life.API.OsuClientV2,desu.life.API.DISCORD.DiscordClient)">
             <summary>
             第三方平台OAuth2相关接口，用于生成第三方平台跳转链接、根据回调code获取第三方平台用户信息
             </summary>
@@ -33,7 +33,7 @@
             <param name="code">osu!跳转用户面板时URL携带的code</param>
             <returns>空返回体</returns>
         </member>
-        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.LinkDiscordAsync">
+        <member name="M:desu.life.Controllers.ThirdPartyOAuth2Controller.LinkDiscordAsync(System.String)">
             <summary>
             Discord OAuth2回调跳转后 确认绑定用户接口
             </summary>
@@ -45,7 +45,7 @@
             用户相关接口
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.Settings.DiscordSettings)">
+        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.API.DISCORD.Settings.DiscordSettings)">
             <summary>
             用户相关接口
             </summary>
@@ -146,6 +146,18 @@
         <member name="M:desu.life.Migrations.fixRedeemCode.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:desu.life.Migrations.UserLinkArchive">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.UserLinkArchive.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.UserLinkArchive.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.UserLinkArchive.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:desu.life.Requests.FillLoginInfoRequest">
             <summary>
             注册后补填信息请求
@@ -176,6 +188,69 @@
                 注册、登录成功后返回 token
             </summary>
         </member>
+        <member name="P:desu.life.Responses.UnifiedResponse`1.Status">
+            <summary>
+            状态结果
+            </summary>
+        </member>
+        <member name="P:desu.life.Responses.UnifiedResponse`1.Message">
+            <summary>
+            消息描述
+            </summary>
+        </member>
+        <member name="P:desu.life.Responses.UnifiedResponse`1.Data">
+            <summary>
+            返回结果
+            </summary>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.Ok">
+            <summary>
+            成功状态返回结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.Ok(`0)">
+            <summary>
+            成功状态返回结果
+            </summary>
+            <param name="data">返回的数据</param>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.Fail(System.String)">
+            <summary>
+            业务失败状态返回结果
+            </summary>
+            <param name="message">错误编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.UnAuthorized">
+            <summary>
+            权限不足返回结果
+            </summary>
+            <param name="message">错误编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.UnAuthenticated">
+            <summary>
+            未认证返回结果
+            </summary>
+            <param name="message">错误编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.Err(System.String)">
+            <summary>
+            异常状态返回结果
+            </summary>
+            <param name="message">错误编码</param>
+            <returns></returns>
+        </member>
+        <member name="M:desu.life.Responses.UnifiedResponse`1.Of(System.Int32,`0,System.String)">
+            <summary>
+            自由组装返回结果
+            </summary>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:desu.life.Responses.UnifiedResponse`1.op_Implicit(`0)~desu.life.Responses.UnifiedResponse{`0}" -->
         <member name="M:desu.life.WebApplicationAuthorizationExtensions.AddDefaultAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
                 初始化默认的Authorization

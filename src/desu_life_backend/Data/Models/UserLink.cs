@@ -5,15 +5,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace desu.life.Data.Models;
 
-//TODO milki 240527: [StringLength(xx)] of strings
 public class UserLink
 {
+    [StringLength(16)]
     public string Osu { get; set; }
 
+    [StringLength(32)]
     public string Discord { get; set; }
 
+    [StringLength(16)]
     public string OneBot { get; set; }
 
+    [StringLength(64)]
     public string OpenQQ { get; set; }
 
     [Key]

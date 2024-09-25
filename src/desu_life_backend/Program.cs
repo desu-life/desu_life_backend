@@ -1,7 +1,11 @@
 ﻿using System.Text;
+using System.Text.Json;
 using desu.life.API;
+using desu.life.API.DISCORD.Settings;
 using desu.life.Data;
 using desu.life.Data.Models;
+using desu.life.Error;
+using desu.life.Responses;
 using desu.life.Services.Email;
 using desu.life.Services.User;
 using desu.life.Settings;
@@ -33,12 +37,14 @@ public class Program
 
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
+        // 配置数据库
         connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(connectionString, new MariaDbServerVersion(new Version(10, 11, 7)))
         );
 
+        // 指定用户类型，配置需要电子邮件确认才能登录
         builder.Services
             .AddIdentityCore<DesuLifeIdentityUser>(config =>
             {
@@ -52,11 +58,13 @@ public class Program
         //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
 
-        // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
+
+        // 指定角色管理服务
         builder.Services
             .AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
         builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
         builder.Services.AddDefaultAuthorization();
+
 
         // JWT
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
@@ -82,6 +90,27 @@ public class Program
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.SecurityKey)),
                     ClockSkew = TimeSpan.Zero
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    // 权限不足
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        var result = JsonSerializer.Serialize(UnifiedResponse<object>.UnAuthorized());                        
+                        return context.Response.WriteAsync(result);
+                    },
+                    // 未登录
+                    OnForbidden = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+                        var result = JsonSerializer.Serialize(UnifiedResponse<object>.UnAuthenticated());
+                        return context.Response.WriteAsync(result);
+                    }
+                };
+
             });
 
         // Services.EmailSender
@@ -155,8 +184,9 @@ public class Program
             });
         });
 
-        // OSU API
+        // 第三方OAuth2 API 客户端
         builder.Services.AddSingleton<API.OsuClientV2>();
+        builder.Services.AddSingleton<API.DISCORD.DiscordClient>();
 
 
     }
@@ -170,9 +200,13 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseRouting();
+
             app.UseSwagger();
-            //app.UseSwaggerUI();
-      
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+
             app.UseKnife4UI(c =>
             {
                 c.RoutePrefix = ""; // serve the UI at root

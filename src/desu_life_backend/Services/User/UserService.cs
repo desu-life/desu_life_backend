@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
+using desu.life.API.DISCORD.Settings;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Error;
@@ -505,6 +506,15 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
         }
         else
         {
+            var linkArchive = new UserLinkArchive
+            {
+                UserId = userId,
+                Platform = "Discord",
+                ArchiveTime = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                LinkInfoArchive = binding.Discord
+            };
+            _applicationDbContext.UserLinkArchive.Add(linkArchive);
+
             binding.Discord = discordAccountId;
             _applicationDbContext.UserLink.Update(binding);
         }
