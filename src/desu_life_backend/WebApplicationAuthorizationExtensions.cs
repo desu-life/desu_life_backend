@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace desu.life;
 
-// TODO: [FrZ] 修改角色组
 public static class WebApplicationAuthorizationExtensions
 {
     /// <summary>
@@ -114,7 +113,7 @@ public static class WebApplicationAuthorizationExtensions
         var roleManager = serviceProvider.GetRequiredService<RoleManager<DesulifeIdentityRole>>();
 
         // 定义角色组
-        string[] roles = ["System", "Bot", "Administrator", "Moderator", "CoOrganizer", "PremiumUser", "User"];
+        string[] roles = ["System", "Bot", "Administrator", "User"];
 
         // 创建角色
         foreach (var role in roles)
@@ -148,9 +147,6 @@ public static class WebApplicationAuthorizationExtensions
                 "System" => "该角色具有系统权限",
                 "Bot" => "该角色具有应答机器人权限",
                 "Administrator" => "该角色具有管理员权限",
-                "Moderator" => "该角色具有版主权限",
-                "CoOrganizer" => "该角色具有协作组织权限",
-                "PremiumUser" => "该角色具有高级用户权限",
                 "User" => "该角色具有用户权限",
                 _ => role.Description
             };
