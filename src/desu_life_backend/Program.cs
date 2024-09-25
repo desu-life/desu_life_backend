@@ -58,12 +58,13 @@ public class Program
         //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
 
-        // Todo: create roles: https://stackoverflow.com/questions/42471866/how-to-create-roles-in-asp-net-core-and-assign-them-to-users
+
         // 指定角色管理服务
         builder.Services
             .AddScoped<IRoleStore<DesulifeIdentityRole>, RoleStore<DesulifeIdentityRole, ApplicationDbContext, int>>();
         builder.Services.AddScoped<RoleManager<DesulifeIdentityRole>>();
         builder.Services.AddDefaultAuthorization();
+
 
         // JWT
         var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ??
