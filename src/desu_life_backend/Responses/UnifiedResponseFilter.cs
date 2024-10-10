@@ -36,7 +36,7 @@ namespace desu.life.Responses
 
 
             // 如果返回的状态码不是200，则不做转换（兼容Controller使用IActionResult直接修改HTTP状态码的行为）
-            if (objectResult.StatusCode != 200) return;
+            if (objectResult.StatusCode != null && objectResult.StatusCode != 200) return;
 
 
             //如果返回结果已经是UnifyResponse<T>类型的，则不需要进行再次包装了
