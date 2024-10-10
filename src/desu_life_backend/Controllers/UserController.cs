@@ -117,7 +117,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         var allowedPolicies = new List<string>();
 
         // 遍历所有注册的策略
-        foreach (var policy in _authorizationOptions.GetPolicies()) // GetPolicies 是你需要实现的获取策略列表的方法
+        foreach (var policy in _authorizationOptions.GetPolicies()) 
         {
             var canAccess = policy.Value.Requirements
                 .OfType<RolesAuthorizationRequirement>()
@@ -134,6 +134,23 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         response.name = User.Identity?.Name;
 
         return response;
+
+
+    }
+    /// <summary>
+    /// 获取所有Policy
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Policies")]
+    public async Task<List<string>> Policies()
+    {
+        var policies = new List<string>();
+        foreach (var policy in _authorizationOptions.GetPolicies()) 
+        {
+            policies.Add(policy.Key) ;
+        }
+
+        return policies;
 
 
     }
