@@ -490,12 +490,4 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
         return binding?.UserId;
     }
 
-    public async Task<UserInfoResponse> UserInfo(int userId)
-    {
-        // 获取用户和角色信息
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-
-        var role = await _userManager.GetRolesAsync(user);
-        return null;
-    }
 }
