@@ -32,4 +32,6 @@ public class ApplicationDbContext : IdentityDbContext<DesuLifeIdentityUser, Desu
     {
         base.OnModelCreating(builder);
     }
+
+public DbSet<desu.life.Data.Models.InfoPanel> InfoPanel { get; set; } = default!;
 }
