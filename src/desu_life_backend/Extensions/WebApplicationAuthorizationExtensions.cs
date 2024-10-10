@@ -5,6 +5,8 @@ namespace desu.life;
 
 public static class WebApplicationAuthorizationExtensions
 {
+    public static List<string> Policies { get; private set; } = new List<string>();
+
     /// <summary>
     ///     初始化默认的Authorization
     /// </summary>

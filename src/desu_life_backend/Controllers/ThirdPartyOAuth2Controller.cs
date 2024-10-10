@@ -88,7 +88,6 @@ public class ThirdPartyOAuth2Controller(
         }
 
         var discordUserInfo = await discordClient.GetUserInfoOAuthAsync(code);
-
         var discordAccountId = discordUserInfo.Id;
         await _userService.LinkDiscordAccount(int.Parse(userId), discordAccountId);
         

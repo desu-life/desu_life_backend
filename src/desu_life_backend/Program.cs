@@ -5,6 +5,7 @@ using desu.life.API.DISCORD.Settings;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Error;
+using desu.life.Extensions;
 using desu.life.Responses;
 using desu.life.Services.Email;
 using desu.life.Services.User;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -98,7 +100,7 @@ public class Program
                         context.HandleResponse();
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         context.Response.ContentType = "application/json";
-                        var result = JsonSerializer.Serialize(UnifiedResponse<object>.UnAuthorized());                        
+                        var result = JsonSerializer.Serialize(UnifiedResponse<object>.UnAuthorized());
                         return context.Response.WriteAsync(result);
                     },
                     // 未登录
@@ -188,6 +190,7 @@ public class Program
         builder.Services.AddSingleton<API.OsuClientV2>();
         builder.Services.AddSingleton<API.DISCORD.DiscordClient>();
 
+        builder.Services.AddOptions();
 
     }
 

@@ -45,7 +45,7 @@
             用户相关接口
             </summary>
         </member>
-        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.API.DISCORD.Settings.DiscordSettings)">
+        <member name="M:desu.life.Controllers.UserController.#ctor(desu.life.Services.User.IUserService,desu.life.Settings.OsuSettings,desu.life.API.DISCORD.Settings.DiscordSettings,Microsoft.AspNetCore.Authorization.IAuthorizationPolicyProvider,Microsoft.Extensions.Options.IOptions{Microsoft.AspNetCore.Authorization.AuthorizationOptions})">
             <summary>
             用户相关接口
             </summary>
@@ -80,9 +80,9 @@
         </member>
         <member name="M:desu.life.Controllers.UserController.Me">
             <summary>
-            个人信息接口
+            获取当前用户的role以及可用的policy
             </summary>
-            <returns>当前用户的角色、可以使用的Policy列表</returns>
+            <returns></returns>
         </member>
         <member name="P:desu.life.Data.Models.RefreshToken.Used">
             <summary>
@@ -103,6 +103,29 @@
             <summary>
             用户操作相关错误码
             </summary>
+        </member>
+        <member name="M:desu.life.WebApplicationAuthorizationExtensions.AddDefaultAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+                初始化默认的Authorization
+            </summary>
+            <remarks>
+                Role为用户组，Policy为具体的功能。<br />
+                一般来说，Policy是否合法首先验证Role，其次验证对应User的Policy开关。<br />
+                示例中使用Claim实现User具体Policy开关，或者也可使用其他方式。
+            </remarks>
+            <param name="services"></param>
+            <example>
+                示例Roles: NormalUser, CommunityAdmin, ServerAdmin, etc.<br />
+                示例Policies: ManageUsers, ManageServers, ManageUserRoles, etc.
+                <code>
+                    options.AddPolicy("RequireManageUsersRole", policy => policy
+                        .RequireRole("ServerAdmin")
+                        .RequireAssertion(k => !k.User.HasClaim("RequireManageUsersRole")
+                            // 基于Claim排除对应Policy，若Claim中存在对应Policy则该功能不可用
+                            // 同时需要api进行管理Claim: _userManager.AddClaimsAsync()
+                    );
+                </code>
+            </example>
         </member>
         <member name="T:desu.life.Migrations.init">
             <inheritdoc />
@@ -257,24 +280,5 @@
             <returns></returns>
         </member>
         <!-- Badly formed XML comment ignored for member "M:desu.life.Responses.UnifiedResponse`1.op_Implicit(`0)~desu.life.Responses.UnifiedResponse{`0}" -->
-        <member name="M:desu.life.Services.User.UserService.GenerateJwtTokenAsync(desu.life.Data.Models.DesuLifeIdentityUser,System.Collections.Generic.IEnumerable{System.String})">
-            <summary>
-            登录或刷新Token时，根据最新的角色和用户信息生成JWT
-            </summary>
-            <param name="user"></param>
-            <param name="roles"></param>
-            <returns></returns>
-        </member>
-        <member name="M:desu.life.WebApplicationAuthorizationExtensions.AddDefaultAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
-            <summary>
-                初始化默认的Authorization
-            </summary>
-            <remarks>
-                Role为角色，Policy为具体的功能，对应前端的按钮/菜单和后端的一个/几个接口。<br />
-                一般来说，Policy是否合法首先验证Role，其次验证对应User的Policy开关。<br />
-                目前仅做角色粒度的权限控制，如果后续有业务需要支持用户粒度的权限控制，可以按example中的联用方式，针对某个Policy启用基于Role和Claim的控制
-            </remarks>
-            <param name="services"></param>
-        </member>
     </members>
 </doc>
