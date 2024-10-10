@@ -193,7 +193,7 @@ public class Program
 
     private static async Task ConfigureAsync(WebApplication app)
     {
-        // 创建角色组
+        // 创建角色
         await app.UseDefaultPoliciesAsync();
 
         // Configure the HTTP request pipeline.

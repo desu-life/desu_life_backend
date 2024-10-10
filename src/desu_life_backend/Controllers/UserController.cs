@@ -1,4 +1,5 @@
-﻿using desu.life.Requests;
+﻿using System.Security.Authentication;
+using desu.life.Requests;
 using desu.life.Responses;
 using desu.life.Services.User;
 using desu.life.Settings;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using desu.life.API.DISCORD.Settings;
+using desu.life.Error;
 
 namespace desu.life.Controllers;
 /// <summary>
@@ -32,7 +34,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
         {
-            return Unauthorized();
+            throw new AuthenticationException(ErrorCodes.User.UserNotExists);
         }
 
         await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);

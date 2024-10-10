@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,6 +9,7 @@ using desu.life.API.DISCORD.Settings;
 using desu.life.Data;
 using desu.life.Data.Models;
 using desu.life.Error;
+using desu.life.Responses;
 using desu.life.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -321,6 +323,12 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
         }
     }
 
+    /// <summary>
+    /// 登录或刷新Token时，根据最新的角色和用户信息生成JWT
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="roles"></param>
+    /// <returns></returns>
     private async Task<TokenResult> GenerateJwtTokenAsync(DesuLifeIdentityUser user, IEnumerable<string> roles)
     {
         Debug.Assert(_jwtSettings.SecurityKey != null);
@@ -398,76 +406,6 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
     {
         // Unix timestamp is seconds past epoch
         return DateTime.UnixEpoch.AddSeconds(unixTimeStamp).ToLocalTime();
-    }
-
-    // TODO
-    public async Task AddUserClaimAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user, string claimType, string claimValue)
-    {
-        var claim = new Claim(claimType, claimValue);
-        var result = await userManager.AddClaimAsync(user, claim);
-        if (!result.Succeeded)
-        {
-            // 处理错误
-        }
-    }
-
-    // TODO
-    public async Task RemoveClaimAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user, string claimType, string claimValue)
-    {
-        // 先获取用户现有的所有声明
-        var claims = await userManager.GetClaimsAsync(user);
-        // 找到具体的声明
-        var claimToRemove = claims.FirstOrDefault(c => c.Type == claimType && c.Value == claimValue);
-        if (claimToRemove != null)
-        {
-            // 存在则删除这个声明
-            var result = await userManager.RemoveClaimAsync(user, claimToRemove);
-            if (!result.Succeeded)
-            {
-                // 如果删除失败，处理错误
-                throw new InvalidOperationException("Failed to remove claim.");
-            }
-        }
-        else
-        {
-            // 如果没有找到声明，处理错误
-            throw new InvalidOperationException("Claim not found.");
-        }
-    }
-
-    // TODO
-    public async Task<bool> UpdateClaimAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user, string claimType, string oldClaimValue, string newClaimValue)
-    {
-        var claims = await userManager.GetClaimsAsync(user);
-        var oldClaim = claims.FirstOrDefault(c => c.Type == claimType && c.Value == oldClaimValue);
-
-        if (oldClaim != null)
-        {
-            // 删除旧声明
-            var removeResult = await userManager.RemoveClaimAsync(user, oldClaim);
-            if (!removeResult.Succeeded)
-            {
-                return false; // 如果删除失败，返回false
-            }
-
-            // 添加新声明
-            var newClaim = new Claim(claimType, newClaimValue);
-            var addResult = await userManager.AddClaimAsync(user, newClaim);
-            if (!addResult.Succeeded)
-            {
-                return false; // 如果添加失败，返回false
-            }
-
-            return true; // 全部成功
-        }
-
-        return false; // 如果没有找到旧声明，返回false
-    }
-
-    // TODO
-    public async Task<List<Claim>> GetUserClaimsAsync(UserManager<DesuLifeIdentityUser> userManager, DesuLifeIdentityUser user)
-    {
-        return [.. (await userManager.GetClaimsAsync(user))];
     }
 
     // 绑定账号
@@ -552,4 +490,12 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
         return binding?.UserId;
     }
 
+    public async Task<UserInfoResponse> UserInfo(int userId)
+    {
+        // 获取用户和角色信息
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        var role = await _userManager.GetRolesAsync(user);
+        return null;
+    }
 }
