@@ -50,7 +50,7 @@ public class ThirdPartyOAuth2Controller(
     /// </summary>
     /// <param name="code">osu!跳转用户面板时URL携带的code</param>
     /// <returns>空返回体</returns>
-    [HttpGet("LinkOsu")]
+    [HttpPost("LinkOsu")]
     public async Task<IActionResult> LinkOsuAsync([FromQuery] string? code)
     {
         if (string.IsNullOrWhiteSpace(code))
@@ -77,7 +77,7 @@ public class ThirdPartyOAuth2Controller(
     /// </summary>
     /// <param name="code">Discord跳转用户面板时URL携带的code</param>
     /// <returns>空返回体</returns>
-    [HttpGet("LinkDiscord")]
+    [HttpPost("LinkDiscord")]
     [Authorize(Policy = "LinkAccount")]
     public async Task LinkDiscordAsync([FromQuery] string? code)
     {
@@ -88,7 +88,6 @@ public class ThirdPartyOAuth2Controller(
         }
 
         var discordUserInfo = await discordClient.GetUserInfoOAuthAsync(code);
-
         var discordAccountId = discordUserInfo.Id;
         await _userService.LinkDiscordAccount(int.Parse(userId), discordAccountId);
         

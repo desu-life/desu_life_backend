@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace desu.life.Controllers;
 
-// roles = [ "System", "Bot", "Administrator", "Moderator", "CoOrganizer", "PremiumUser", "User" ];
 
 [ApiController]
 [Route("[controller]")]

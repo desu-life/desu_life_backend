@@ -1,4 +1,5 @@
-﻿using desu.life.Requests;
+﻿using System.Security.Authentication;
+using desu.life.Requests;
 using desu.life.Responses;
 using desu.life.Services.User;
 using desu.life.Settings;
@@ -7,6 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using desu.life.API.DISCORD.Settings;
+using desu.life.Error;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using desu.life.Extensions;
+using desu.life.Services;
+using Microsoft.Extensions.Options;
 
 namespace desu.life.Controllers;
 /// <summary>
@@ -14,11 +20,30 @@ namespace desu.life.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(IUserService userService, OsuSettings osuSettings, DiscordSettings discordSettings) : ControllerBase
+public class UserController(IUserService userService, OsuSettings osuSettings, DiscordSettings discordSettings, IAuthorizationPolicyProvider policyProvider, IOptions<AuthorizationOptions> options) : ControllerBase
 {
     private readonly IUserService _userService = userService;
     private readonly OsuSettings _osuSettings = osuSettings;
     private readonly DiscordSettings _discordSettings = discordSettings;
+    private readonly AuthorizationOptions _authorizationOptions = options.Value;
+    /// <summary>
+    /// 用户补填邮箱、密码接口
+    /// </summary>
+    /// <param name="request">补填请求</param>
+    /// <returns>空返回体</returns>
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(FillLoginInfoRequest request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            throw new AuthenticationException(ErrorCodes.User.UserNotExists);
+        }
+
+        await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);
+
+        return Ok();
+    }
 
 
     /// <summary>
@@ -32,7 +57,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
         {
-            return Unauthorized();
+            throw new AuthenticationException(ErrorCodes.User.UserNotExists);
         }
 
         await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);
@@ -100,5 +125,54 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         });
     }
 
-    //TODO 获取用户个人信息接口
+    /// <summary>
+    /// 获取当前用户的role以及可用的policy
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Me")]
+    public async Task<MyInfoResponse> Me()
+    {
+        var response = new MyInfoResponse();
+
+        var userRoles = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        var allowedPolicies = new List<string>();
+
+        // 遍历所有注册的策略
+        foreach (var policy in _authorizationOptions.GetPolicies()) 
+        {
+            var canAccess = policy.Value.Result.Requirements
+                .OfType<RolesAuthorizationRequirement>()
+                .Any(requirement => userRoles.Any(role => requirement.AllowedRoles.Contains(role)));
+
+            if (canAccess)
+            {
+                allowedPolicies.Add(policy.Key);
+            }
+        }
+
+        response.allowedPolicies = allowedPolicies;
+        response.roles = userRoles;
+        response.name = User.Identity?.Name;
+
+        return response;
+
+
+    }
+    /// <summary>
+    /// 获取所有Policy
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("Policies")]
+    public async Task<List<string>> Policies()
+    {
+        var policies = new List<string>();
+        foreach (var policy in _authorizationOptions.GetPolicies()) 
+        {
+            policies.Add(policy.Key) ;
+        }
+
+        return policies;
+
+
+    }
 }
