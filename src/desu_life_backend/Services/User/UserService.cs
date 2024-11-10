@@ -104,30 +104,33 @@ public class UserService(ApplicationDbContext applicationDbContext, JwtSettings 
 
         if (existingUser != null) // 非已验证邮箱用户，则触发邮箱验证
         {
+            // TODO 改成发邮件后在另一个接口触发修改
 
+            // // 发送验证邮件
+            // if (!existingUser.EmailConfirmed)
+            // {
+            //     var existingUserEmailSendResult = await SendEmailAsync(email);
+            //     if (!existingUserEmailSendResult.Success)
+            //     {
+            //         throw new InvalidOperationException(ErrorCodes.User.EmailSendFailed);
+            //     }
+            // }
+            // else
+            // {
+            //     throw new InvalidOperationException(ErrorCodes.User.EmailExists);
+            // }
+
+            
             // 生成密码重置令牌
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
-
+            
             // 使用令牌直接设置密码
             var result = await _userManager.ResetPasswordAsync(existingUser, resetToken, password);
-
+            
             if (result.Succeeded)
             {
                 throw new InvalidOperationException(ErrorCodes.User.EmailSendFailed);
             }
-
-            // 发送验证邮件
-            if (!existingUser.EmailConfirmed)
-            {
-                var existingUserEmailSendResult = await SendEmailAsync(email);
-                if (!existingUserEmailSendResult.Success)
-                {
-                    throw new InvalidOperationException(ErrorCodes.User.EmailSendFailed);
-                }
-            }
-
-            throw new InvalidOperationException(ErrorCodes.User.EmailExists);
-
         }
 
 

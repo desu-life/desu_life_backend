@@ -11,6 +11,7 @@ using desu.life.API.DISCORD.Settings;
 using desu.life.Error;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using desu.life.Extensions;
+using desu.life.Services;
 using Microsoft.Extensions.Options;
 
 namespace desu.life.Controllers;
@@ -25,6 +26,26 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     private readonly OsuSettings _osuSettings = osuSettings;
     private readonly DiscordSettings _discordSettings = discordSettings;
     private readonly AuthorizationOptions _authorizationOptions = options.Value;
+    /// <summary>
+    /// 用户补填邮箱、密码接口
+    /// </summary>
+    /// <param name="request">补填请求</param>
+    /// <returns>空返回体</returns>
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(FillLoginInfoRequest request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            throw new AuthenticationException(ErrorCodes.User.UserNotExists);
+        }
+
+        await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);
+
+        return Ok();
+    }
+
+
     /// <summary>
     /// 用户补填邮箱、密码接口
     /// </summary>
@@ -119,7 +140,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         // 遍历所有注册的策略
         foreach (var policy in _authorizationOptions.GetPolicies()) 
         {
-            var canAccess = policy.Value.Requirements
+            var canAccess = policy.Value.Result.Requirements
                 .OfType<RolesAuthorizationRequirement>()
                 .Any(requirement => userRoles.Any(role => requirement.AllowedRoles.Contains(role)));
 

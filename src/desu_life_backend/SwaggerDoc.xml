@@ -50,6 +50,13 @@
             用户相关接口
             </summary>
         </member>
+        <member name="M:desu.life.Controllers.UserController.ChangePassword(desu.life.Requests.FillLoginInfoRequest)">
+            <summary>
+            用户补填邮箱、密码接口
+            </summary>
+            <param name="request">补填请求</param>
+            <returns>空返回体</returns>
+        </member>
         <member name="M:desu.life.Controllers.UserController.FillLoginInfo(desu.life.Requests.FillLoginInfoRequest)">
             <summary>
             用户补填邮箱、密码接口
@@ -180,6 +187,21 @@
         </member>
         <member name="M:desu.life.Migrations.UserLinkArchive.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
+        </member>
+        <member name="T:desu.life.Requests.ChangePasswordRequest">
+            <summary>
+            注册后补填信息请求
+            </summary>
+        </member>
+        <member name="P:desu.life.Requests.ChangePasswordRequest.Password">
+            <summary>
+            登录密码
+            </summary>
+        </member>
+        <member name="P:desu.life.Requests.ChangePasswordRequest.Email">
+            <summary>
+            邮箱
+            </summary>
         </member>
         <member name="T:desu.life.Requests.FillLoginInfoRequest">
             <summary>

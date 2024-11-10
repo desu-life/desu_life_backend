@@ -7,6 +7,7 @@ using desu.life.Data.Models;
 using desu.life.Error;
 using desu.life.Extensions;
 using desu.life.Responses;
+using desu.life.Services;
 using desu.life.Services.Email;
 using desu.life.Services.User;
 using desu.life.Settings;
@@ -56,7 +57,8 @@ public class Program
                 config.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
             })
             .AddRoles<DesulifeIdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders(); 
         //https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-8.0
         builder.Services.AddTransient<EmailConfirmationTokenProvider<DesuLifeIdentityUser>>();
 
