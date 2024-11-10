@@ -30,6 +30,26 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
     /// </summary>
     /// <param name="request">补填请求</param>
     /// <returns>空返回体</returns>
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(FillLoginInfoRequest request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            throw new AuthenticationException(ErrorCodes.User.UserNotExists);
+        }
+
+        await _userService.FillLoginInfo(Convert.ToInt32(userId), request.Password, request.Email);
+
+        return Ok();
+    }
+
+
+    /// <summary>
+    /// 用户补填邮箱、密码接口
+    /// </summary>
+    /// <param name="request">补填请求</param>
+    /// <returns>空返回体</returns>
     [HttpPost("FillLoginInfo")]
     public async Task<IActionResult> FillLoginInfo(FillLoginInfoRequest request)
     {
