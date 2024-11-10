@@ -11,6 +11,7 @@ using desu.life.API.DISCORD.Settings;
 using desu.life.Error;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using desu.life.Extensions;
+using desu.life.Services;
 using Microsoft.Extensions.Options;
 
 namespace desu.life.Controllers;
@@ -139,7 +140,7 @@ public class UserController(IUserService userService, OsuSettings osuSettings, D
         // 遍历所有注册的策略
         foreach (var policy in _authorizationOptions.GetPolicies()) 
         {
-            var canAccess = policy.Value.Requirements
+            var canAccess = policy.Value.Result.Requirements
                 .OfType<RolesAuthorizationRequirement>()
                 .Any(requirement => userRoles.Any(role => requirement.AllowedRoles.Contains(role)));
 

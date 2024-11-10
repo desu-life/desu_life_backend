@@ -7,6 +7,7 @@ using desu.life.Data.Models;
 using desu.life.Error;
 using desu.life.Extensions;
 using desu.life.Responses;
+using desu.life.Services;
 using desu.life.Services.Email;
 using desu.life.Services.User;
 using desu.life.Settings;
