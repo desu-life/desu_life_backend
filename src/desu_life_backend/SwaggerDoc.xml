@@ -188,6 +188,18 @@
         <member name="M:desu.life.Migrations.UserLinkArchive.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:desu.life.Migrations.InfoPanel">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.InfoPanel.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.InfoPanel.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:desu.life.Migrations.InfoPanel.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:desu.life.Requests.ChangePasswordRequest">
             <summary>
             注册后补填信息请求
